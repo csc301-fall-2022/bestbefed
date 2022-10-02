@@ -79,23 +79,23 @@ We will ideally implement a structural testing strategy as we develop our produc
 
 1. **As a** food bank owner, **I want** to be able to place orders on food items that I need **so that I can** obtain more food and groceries to feed people in need.’
 
-**Given** a list of possible suppliers in my city, **when I** search for food items I want to purchase, **then** I am provided with a list of grocery stores that have the products I am requesting, ordered by proximity.
+   **Given** a list of possible suppliers in my city, **when I** search for food items I want to purchase, **then** I am provided with a list of grocery stores that have the products I am requesting, ordered by proximity.
 
 2. **As a** grocery store owner/manager, **I want** to be able to donate products that wouldn’t otherwise be sold, **so that I can** reduce food waste and help people in need.
 
-**Given** that I have provided information on my current stock and sales numbers, **when I** check my in-app inventory, **then** I am provided with a list of products that are likely to expire before sale and can be donated.
+   **Given** that I have provided information on my current stock and sales numbers, **when I** check my in-app inventory, **then** I am provided with a list of products that are likely to expire before sale and can be donated.
 
 3. **As a** grocery store owner, **I want** to edit/remove an item, **so that I can** remove an accidentally added item or update the price.
 
-**Given** that I have accidentally added an item with the wrong price, **when I** click on the edit button, **then** I am able to adjust the price or remove the item.
+   **Given** that I have accidentally added an item with the wrong price, **when I** click on the edit button, **then** I am able to adjust the price or remove the item.
 
 4. **As a** food bank owner, **I want** to view a list of possible orders, **so that I can** decide what I want to order
 
-**Given** that there are multiple possible orders from a store, **when I** click on the store, **then** a list of all the available orders are shown to the user.
+   **Given** that there are multiple possible orders from a store, **when I** click on the store, **then** a list of all the available orders are shown to the user.
 
 5. **As a** consumer, **I want** to be able to review certain stores, **so that** other consumers will know which stores are good
 
-**Given** that there are multiple stores which I have ordered from, **when I** click on the review button, **then** I am able to rate the store out of 5 stars and leave a message to explain my rating.
+   **Given** that there are multiple stores which I have ordered from, **when I** click on the review button, **then** I am able to rate the store out of 5 stars and leave a message to explain my rating.
 
 ----
 ## Intellectual Property Confidentiality Agreement 
