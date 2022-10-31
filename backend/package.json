@@ -1,0 +1,22 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "BestBeFed Backend Service",
+  "main": "server.js",
+  "scripts": {
+    "build": "npx tsc",
+    "start": "node dist/server.js",
+    "dev": "concurrently \"npx tsc --watch\" \"nodemon dist/server.js\""
+  },
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.14",
+    "@types/node": "^18.11.8",
+    "concurrently": "^7.5.0",
+    "nodemon": "^2.0.20",
+    "typescript": "^4.8.4"
+  }
+}
