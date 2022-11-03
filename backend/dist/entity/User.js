@@ -12,6 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const typeorm_1 = require("typeorm");
 const uuid_1 = require("uuid");
+const Item_1 = require("./Item");
+const Order_1 = require("./Order");
 let User = class User extends typeorm_1.BaseEntity {
     generateId() {
         this.id = (0, uuid_1.v4)();
@@ -21,6 +23,10 @@ __decorate([
     (0, typeorm_1.PrimaryColumn)("uuid"),
     __metadata("design:type", String)
 ], User.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.Column)("varchar", { length: 255 }),
+    __metadata("design:type", String)
+], User.prototype, "username", void 0);
 __decorate([
     (0, typeorm_1.Column)("varchar", { length: 255 }),
     __metadata("design:type", String)
@@ -38,10 +44,6 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "password", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date"),
-    __metadata("design:type", Date)
-], User.prototype, "dateOfBirth", void 0);
-__decorate([
     (0, typeorm_1.Column)("boolean"),
     __metadata("design:type", Boolean)
 ], User.prototype, "emailVerified", void 0);
@@ -49,6 +51,18 @@ __decorate([
     (0, typeorm_1.Column)("date"),
     __metadata("design:type", Date)
 ], User.prototype, "createDate", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => Order_1.Order, (order) => order.user),
+    __metadata("design:type", Array)
+], User.prototype, "orders", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => Item_1.Item, (item) => item.user),
+    __metadata("design:type", Array)
+], User.prototype, "cart", void 0);
+__decorate([
+    (0, typeorm_1.Column)("simple-json"),
+    __metadata("design:type", Object)
+], User.prototype, "paymentInfo", void 0);
 __decorate([
     (0, typeorm_1.BeforeInsert)(),
     __metadata("design:type", Function),

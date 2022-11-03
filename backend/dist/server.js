@@ -17,7 +17,9 @@ const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const path_1 = __importDefault(require("path"));
 require("reflect-metadata");
 // Local imports
+const user_1 = __importDefault(require("./routes/user"));
 const data_source_1 = require("./data-source");
+// import { createUser } from './controllers/user';
 const app = (0, express_1.default)();
 const port = process.env.PORT || 8000;
 app.use(express_1.default.static(path_1.default.join(__dirname, "../../frontend/build")));
@@ -30,6 +32,8 @@ app.use(express_1.default.json());
 //         console.log("Conncection to database established...");
 //     })
 //     .catch((error) => console.log(error));
+// Setting up the /user routes
+app.use("/user", user_1.default);
 // Alternatively
 const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
     try {

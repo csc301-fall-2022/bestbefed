@@ -4,9 +4,10 @@ import path from 'path'
 import "reflect-metadata"
 
 // Local imports
+import userRouter from "./routes/user";
+
 import { AppDataSource } from './data-source';
 import { User } from './entity/User';
-// import { createUser } from './controllers/user';
 
 const app: Express = express();
 const port = process.env.PORT || 8000;
@@ -17,12 +18,8 @@ app.use(express.static(path.join(__dirname, "../../frontend/build")))
 app.use(cookieParser());
 app.use(express.json());
 
-// Initialize the database connection via TypeORM
-// AppDataSource.initialize()
-//     .then(() => {
-//         console.log("Conncection to database established...");
-//     })
-//     .catch((error) => console.log(error));
+// Setting up the /user routes
+app.use("/user", userRouter);
 
 // Alternatively
 const connectDB = async() => {
