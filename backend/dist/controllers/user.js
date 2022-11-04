@@ -12,8 +12,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createUser = void 0;
+exports.logoutUser = exports.loginUser = exports.createUser = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const validator_1 = __importDefault(require("validator"));
 const data_source_1 = require("../data-source");
 const User_1 = require("../entity/User");
@@ -88,6 +89,14 @@ const cleanUser = (newUser) => __awaiter(void 0, void 0, void 0, function* () {
         return newUser;
     }
 });
+/**
+ * Handles POST user/ and attempts to create new User in database.
+ *
+ * @param {Request}  req   Express.js object that contains all data pertaining to the POST request.
+ * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
+ *
+ * @return {null}          Simply sends response back to client to notify of success or failure.
+ */
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Try validating the data entered for the new user.
@@ -132,5 +141,55 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.createUser = createUser;
-// export const loginUser = (req: Request, res: Response) => {
-// }
+/**
+ * Handles POST user/login and attempts to log in and authenticate a user.
+ *
+ * @param {Request}  req   Express.js object that contains all data pertaining to the POST request.
+ * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
+ *
+ * @return {null}          Simply sends response back to client to notify of success or failure.
+ */
+const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Try to query and store user corresponding to entered username.
+        const user = yield userRepository.findOneBy({
+            username: req.body.username
+        });
+        if (!user) {
+            return res.json("User does not exist").status(404);
+        }
+        // If user existed, verify password is correct.
+        const validPassword = yield bcryptjs_1.default.compare(req.body.password, user.password);
+        if (!validPassword) {
+            return res.json("Password is incorrect").status(400);
+        }
+        // Create the JWT to provide user with authentication.
+        const payload = {
+            id: user.id
+        };
+        // <string>process.env.SECRET
+        const token = jsonwebtoken_1.default.sign(payload, process.env.SECRET, { expiresIn: "1d" });
+        res.cookie('access_token', token, {
+            httpOnly: true,
+        }).status(200).json({
+            username: user.username
+        });
+    }
+    catch (err) {
+        res.status(500).send(err);
+    }
+});
+exports.loginUser = loginUser;
+/**
+ * Handles GET user/logout and attempts to log the user out of their session.
+ *
+ * @param {Request}  req   Express.js object that contains all data pertaining to the GET request.
+ * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
+ *
+ * @return {null}          Simply sends response back to client to notify of success or failure after trying to clear cookie.
+ */
+const logoutUser = (req, res) => {
+    res.clearCookie("access_token");
+    res.send("Logged out!").status(200);
+};
+exports.logoutUser = logoutUser;

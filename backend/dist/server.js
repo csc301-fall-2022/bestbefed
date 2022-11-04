@@ -15,26 +15,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const path_1 = __importDefault(require("path"));
+require("dotenv/config");
 require("reflect-metadata");
 // Local imports
 const user_1 = __importDefault(require("./routes/user"));
 const data_source_1 = require("./data-source");
-// import { createUser } from './controllers/user';
+const auth_1 = require("./controllers/auth");
 const app = (0, express_1.default)();
 const port = process.env.PORT || 8000;
 app.use(express_1.default.static(path_1.default.join(__dirname, "../../frontend/build")));
-// Cookies
+// Middleware via External Libraries.
 app.use((0, cookie_parser_1.default)());
 app.use(express_1.default.json());
-// Initialize the database connection via TypeORM
-// AppDataSource.initialize()
-//     .then(() => {
-//         console.log("Conncection to database established...");
-//     })
-//     .catch((error) => console.log(error));
-// Setting up the /user routes
+// Routing middleware.
 app.use("/user", user_1.default);
-// Alternatively
+// Initializes connection to DB using TypeORM when called.
 const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield data_source_1.AppDataSource.initialize();
@@ -44,13 +39,9 @@ const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
         console.log(e);
     }
 });
-app.get('/api', (req, res) => {
+// Example of Auth middleware - the second argument is our auth function that verifies user is logged in before proceeding
+app.get('/api', auth_1.isAuthenticated, (req, res) => {
     res.send('<h1>Hello from API endpoint!<h1>');
-});
-// Test endpoint
-app.post("/login", (req, res) => {
-    // Create user
-    res.send("User has hopefully been created");
 });
 app.listen(port, () => {
     connectDB();

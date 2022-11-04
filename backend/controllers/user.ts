@@ -142,7 +142,7 @@ export const createUser = async (req: Request, res: Response) => {
     } catch (err) {
         res.send(err).status(500);
     }
-}
+};
 
 /**
  * Handles POST user/login and attempts to log in and authenticate a user.
@@ -152,6 +152,46 @@ export const createUser = async (req: Request, res: Response) => {
  * 
  * @return {null}          Simply sends response back to client to notify of success or failure.
  */
-export const loginUser = (req: Request, res: Response) => {
+export const loginUser = async (req: Request, res: Response) => {
+    try {
+        // Try to query and store user corresponding to entered username.
+        const user = await userRepository.findOneBy({
+            username: req.body.username
+        });
+        if (!user) {
+            return res.json("User does not exist").status(404);
+        }
 
-}
+        // If user existed, verify password is correct.
+        const validPassword = await bcrypt.compare(req.body.password, user.password);
+        if (!validPassword) {
+            return res.json("Password is incorrect").status(400);
+        }
+
+        // Create the JWT to provide user with authentication.
+        const payload = {
+            id: user.id
+        };
+        const token = jwt.sign(payload, <string>process.env.SECRET, {expiresIn: "1d"});
+        res.cookie('access_token', token, {
+            httpOnly: true,
+        }).status(200).json({
+            username: user.username
+        });
+    } catch (err) {
+        res.status(500).send(err);
+    }
+};
+
+/**
+ * Handles GET user/logout and attempts to log the user out of their session.
+ *
+ * @param {Request}  req   Express.js object that contains all data pertaining to the GET request.
+ * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
+ * 
+ * @return {null}          Simply sends response back to client to notify of success or failure after trying to clear cookie.
+ */
+export const logoutUser = (req: Request, res: Response) => {
+    res.clearCookie("access_token");
+    res.send("Logged out!").status(200);
+};
