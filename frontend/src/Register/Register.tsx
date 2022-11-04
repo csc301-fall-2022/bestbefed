@@ -302,7 +302,7 @@ function Register() {
           </p>          
 
           <label htmlFor="exp">
-            Expirary Date: 
+            Expiry Date: 
             <FontAwesomeIcon icon={faCarrot} className={validExp ? "valid" : "hide"} />
             <FontAwesomeIcon icon={faTrashCan} className={validExp || !exp ? "hide" : "invalid"} />
           </label>
@@ -340,8 +340,17 @@ function Register() {
                             Invalid cvv number.
                             
           </p>  
-                                                                                                
+
+        <button disabled={!validUsername || !validPassword || !validMPassword || !validLastname || !validFirstname || !validExp || !validEmail || !validCvv || !validCc? true : false }> Fight Food Waste </button>                                                                             
+        
+        Already a member?<br />
+                        <span className="line">
+                            {/*put router link here*/}
+                            <a href="#">Login here</a>
+                        </span>
+
         </form>
+
       </section>
     );
   }
