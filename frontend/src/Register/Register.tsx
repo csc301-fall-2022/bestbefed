@@ -1,18 +1,18 @@
-import { useState, useRef, useEffect, LegacyRef } from "react";
+import { useState, useRef, useEffect} from "react";
 import { faCarrot, faTrashCan, faInfoCircle } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import './Register.css'
 
 const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
-const FN_REGEX = /^[A-z][A-z0-9-_]{0,23}$/;
-const LN_REGEX = /^[A-z][A-z0-9-_]{0,23}$/;
+const FN_REGEX = /^[A-z][A-z]{0,23}$/;
+const LN_REGEX = /^[A-z][A-z]{0,23}$/;
 const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
 const visaRegEx = /^(?:4[0-9]{12}(?:[0-9]{3})?)$/;
 const mastercardRegEx = /^(?:5[1-5][0-9]{14})$/;
 const amexpRegEx = /^(?:3[47][0-9]{13})$/;
 const discovRegEx = /^(?:6(?:011|5[0-9][0-9])[0-9]{12})$/;
-const expREGEX = /^[0-9]{4}$/;
+const expREGEX = /^[0-9]{2}[/][0-9]{2}$/;
 const cvvREGEX = /^[0-9]{3}$/;
 const REGISTER_URL = '/register';
 
@@ -128,14 +128,14 @@ function Register() {
       const result = expREGEX.test(exp);
       console.log(exp);
       console.log(result);
-      setValidCc(result)
+      setValidExp(result)
     }, [exp])
 
     useEffect(() => {
       const result = cvvREGEX.test(cvv);
       console.log(cvv);
       console.log(result);
-      setValidCc(result)
+      setValidCvv(result)
     }, [cvv])
 
     // clearing error message after user change
@@ -149,6 +149,7 @@ function Register() {
         <h1>Register </h1>
 
         <form>
+
           <label htmlFor="username">
             Username: 
             <FontAwesomeIcon icon={faCarrot} className={validUsername ? "valid" : "hide"} />
@@ -165,13 +166,181 @@ function Register() {
             onFocus={() => setUsernameFocus(true)}
             onBlur={() => setUsernameFocus(false)}
           />
-          <p id="uidnote" className={focusedOnUsername && username && !validUsername ? "instructions" : "offscreen"}>
+          <p className={focusedOnUsername && username && !validUsername ? "instructions" : "offscreen"}>
                             <FontAwesomeIcon icon={faInfoCircle} />
                             <br/>
                             4 - 24 characters<br/>
                             Begins with a letter. <br/>
                             Letters, numbers, underscores and hyphens only.
           </p>
+
+          <label htmlFor="password">
+            Password: 
+            <FontAwesomeIcon icon={faCarrot} className={validPassword ? "valid" : "hide"} />
+            <FontAwesomeIcon icon={faTrashCan} className={validPassword || !password ? "hide" : "invalid"} />
+          </label>
+          <input 
+            type="password"
+            id="password"
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            onFocus={() => setPasswordFocus(true)}
+            onBlur={() => setPasswordFocus(false)}
+          />
+          <p className={focusedOnPassword && !validPassword ? "instructions" : "offscreen"}>
+                            <FontAwesomeIcon icon={faInfoCircle} />
+                            <br/>
+                            8 - 24 characters<br/>
+                            Includes an uppercase and lowercase letter,<br/>
+                            a letter and a number.
+
+                            
+          </p>  
+
+          <label htmlFor="mpassword">
+            Confirm Password: 
+            <FontAwesomeIcon icon={faCarrot} className={validMPassword && mpassword ? "valid" : "hide"} />
+            <FontAwesomeIcon icon={faTrashCan} className={validMPassword || !mpassword ? "hide" : "invalid"} />
+          </label>
+          <input 
+            type="password"
+            id="mpassword"
+            onChange={(e) => setMPassword(e.target.value)}
+            required
+            onFocus={() => setMPasswordFocus(true)}
+            onBlur={() => setMPasswordFocus(false)}
+          />
+          <p className={focusedOnMPassword && !validMPassword ? "instructions" : "offscreen"}>
+                            <FontAwesomeIcon icon={faInfoCircle} />
+                            Passwords do not match.
+
+                            
+          </p>   
+          
+          <label htmlFor="firstname">
+            First Name: 
+            <FontAwesomeIcon icon={faCarrot} className={validFirstname ? "valid" : "hide"} />
+            <FontAwesomeIcon icon={faTrashCan} className={validFirstname || !firstname ? "hide" : "invalid"} />
+          </label>
+          <input 
+            type="text"
+            id="firstname"
+            onChange={(e) => setFirstname(e.target.value)}
+            value={firstname}
+            required
+            onFocus={() => setFirstnameFocus(true)}
+            onBlur={() => setFirstnameFocus(false)}
+          />
+          <p className={focusedOnFirstname && !validFirstname ? "instructions" : "offscreen"}>
+                            <FontAwesomeIcon icon={faInfoCircle} />
+                            <br/>
+                            1 - 24 characters<br/>
+                            Letters only. <br/>
+                            
+          </p>   
+
+          <label htmlFor="lastname">
+            Last Name: 
+            <FontAwesomeIcon icon={faCarrot} className={validLastname ? "valid" : "hide"} />
+            <FontAwesomeIcon icon={faTrashCan} className={validLastname || !lastname ? "hide" : "invalid"} />
+          </label>
+          <input 
+            type="text"
+            id="lastname"
+            onChange={(e) => setLastname(e.target.value)}
+            value={lastname}
+            required
+            onFocus={() => setLastnameFocus(true)}
+            onBlur={() => setLastnameFocus(false)}
+          />
+          <p className={focusedOnLastname && !validLastname ? "instructions" : "offscreen"}>
+                            <FontAwesomeIcon icon={faInfoCircle} />
+                            <br/>
+                            1 - 24 characters<br/>
+                            Letters only. <br/>
+                            
+          </p>      
+
+          <label htmlFor="eml">
+            Email: 
+            <FontAwesomeIcon icon={faCarrot} className={validEmail ? "valid" : "hide"} />
+            <FontAwesomeIcon icon={faTrashCan} className={validEmail || !email ? "hide" : "invalid"} />
+          </label>
+          <input 
+            type="email"
+            id="eml"
+            onChange={(e) => setEmail(e.target.value)}
+            value={email}
+            required
+            onFocus={() => setEmailFocus(true)}
+            onBlur={() => setEmailFocus(false)}
+          />
+          <p className={focusedOnEmail && !validEmail && email ? "instructions" : "offscreen"}>
+                            <FontAwesomeIcon icon={faInfoCircle} />
+                            "someone@example.com"
+                            
+          </p>   
+          
+          <label htmlFor="creditcard">
+            Credit Card #: 
+            <FontAwesomeIcon icon={faCarrot} className={validCc ? "valid" : "hide"} />
+            <FontAwesomeIcon icon={faTrashCan} className={validCc || !creditcard ? "hide" : "invalid"} />
+          </label>
+          <input 
+            type="text"
+            id="creditcard"
+            onChange={(e) => setCc(e.target.value)}
+            value={creditcard}
+            required
+            onFocus={() => setCcFocus(true)}
+            onBlur={() => setCcFocus(false)}
+          />
+          <p className={focusedOnCc && !validCc && creditcard ? "instructions" : "offscreen"}>
+                            <FontAwesomeIcon icon={faInfoCircle} />
+                            Invalid Credit Card Number.
+                            
+          </p>          
+
+          <label htmlFor="exp">
+            Expirary Date: 
+            <FontAwesomeIcon icon={faCarrot} className={validExp ? "valid" : "hide"} />
+            <FontAwesomeIcon icon={faTrashCan} className={validExp || !exp ? "hide" : "invalid"} />
+          </label>
+          <input 
+            type="text"
+            id="exp"
+            onChange={(e) => setExp(e.target.value)}
+            value={exp}
+            required
+            onFocus={() => setExpFocus(true)}
+            onBlur={() => setExpFocus(false)}
+          />
+          <p className={focusedOnExp && !validExp && exp ? "instructions" : "offscreen"}>
+                            <FontAwesomeIcon icon={faInfoCircle} />
+                            Invalid Date. Example: "01/25"
+                            
+          </p>  
+
+          <label htmlFor="cvv">
+            cvv: 
+            <FontAwesomeIcon icon={faCarrot} className={validCvv ? "valid" : "hide"} />
+            <FontAwesomeIcon icon={faTrashCan} className={validCvv || !cvv ? "hide" : "invalid"} />
+          </label>
+          <input 
+            type="text"
+            id="cvv"
+            onChange={(e) => setCvv(e.target.value)}
+            value={cvv}
+            required
+            onFocus={() => setCvvFocus(true)}
+            onBlur={() => setCvvFocus(false)}
+          />
+          <p className={focusedOnCvv && !validCvv && cvv ? "instructions" : "offscreen"}>
+                            <FontAwesomeIcon icon={faInfoCircle} />
+                            Invalid cvv number.
+                            
+          </p>  
+                                                                                                
         </form>
       </section>
     );
