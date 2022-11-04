@@ -1,7 +1,20 @@
+import Login from "./Login/Login"
+import Register from "./Register/Register";
+import { AuthProvider } from 'react-auth-kit'
+
+
 function App() {
   return (
-    <h1>Hello from React App!</h1>
+    <AuthProvider authType = {'cookie'}
+      authName={'_auth'}
+      cookieDomain={window.location.hostname}
+      cookieSecure={window.location.protocol === "https:"}>
+      <main className="App">
+        <Register />
+      </main>
+  </AuthProvider>
+
   );
-}
+} 
 
 export default App;

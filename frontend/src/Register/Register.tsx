@@ -1,12 +1,13 @@
-import { useState, useRef, useEffect} from "react";
+import { useState, useRef, useEffect, FormEvent} from "react";
 import { faCarrot, faTrashCan, faInfoCircle } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import axios from "../api/axios";
 import './Register.css'
 
 const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
-const FN_REGEX = /^[A-z][A-z]{0,23}$/;
-const LN_REGEX = /^[A-z][A-z]{0,23}$/;
+const FN_REGEX = /^[A-z][A-z ]{0,23}$/;
+const LN_REGEX = /^[A-z][A-z ]{0,23}$/;
 const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
 const visaRegEx = /^(?:4[0-9]{12}(?:[0-9]{3})?)$/;
 const mastercardRegEx = /^(?:5[1-5][0-9]{14})$/;
@@ -14,7 +15,7 @@ const amexpRegEx = /^(?:3[47][0-9]{13})$/;
 const discovRegEx = /^(?:6(?:011|5[0-9][0-9])[0-9]{12})$/;
 const expREGEX = /^[0-9]{2}[/][0-9]{2}$/;
 const cvvREGEX = /^[0-9]{3}$/;
-const REGISTER_URL = '/register';
+const REGISTER_URL = '/user';
 
 
 function ValidateCreditCardNumber(ccNum: string) {
@@ -35,7 +36,7 @@ function ValidateCreditCardNumber(ccNum: string) {
 
 function Register() {
     const userRef = useRef<null | HTMLInputElement>(null);
-    const errRef = useRef(null);
+    const errRef = useRef<null | HTMLInputElement>(null);
 
     const [username, setUsername] = useState('');
     const [validUsername, setValidUsername] = useState(false);
@@ -73,8 +74,9 @@ function Register() {
     const [validCvv, setValidCvv] = useState(false);
     const [focusedOnCvv, setCvvFocus] = useState(false);
 
+    // for backend and submission validation
     const [errormessage, setErrorMessage] = useState('');
-    const [success, setSuccess] = useState('false');
+    const [success, setSuccess] = useState(false);
 
     useEffect(() => {
       userRef.current?.focus();
@@ -143,12 +145,75 @@ function Register() {
       setErrorMessage('');
     }, [username, password, mpassword, firstname, lastname, email])
 
+    const handleSubmit = async (e:FormEvent) => {
+      e.preventDefault()
+
+      // button hacking check
+      const v1 = USER_REGEX.test(username);
+      const v2 = PWD_REGEX.test(password);
+      const v3 = EMAIL_REGEX.test(email);
+      const v4 = FN_REGEX.test(firstname);
+      const v5 = LN_REGEX.test(lastname)
+
+      if (!v1 || !v2 || !v3 || !v4 || !v5) {
+          setErrorMessage("Invalid Entry. Review Input Fields");
+          return;
+      }
+      // handle submission here
+      try {
+        const request_data = {
+          username: username,
+          password: password,
+          firstname: firstname,
+          lastname: lastname,
+          email: email,
+          paymentInfo: {
+            creditcard: creditcard,
+            expirydate: exp,
+            cvv: cvv
+          }
+        }
+        const response = await axios.post(REGISTER_URL,
+          JSON.stringify(request_data),
+          {
+            headers: { 'Content-Type': 'application/json' },
+            withCredentials: true
+          }
+          )
+
+          console.log(JSON.stringify(response));
+          setSuccess(true);
+          // clear input fields here if we want
+      } catch (err:any) {
+        if (!err?.response){
+          setErrorMessage("No server response, possible maintainance at work")
+        }
+        else if (err.response?.status === 400){
+          setErrorMessage("That username is taken")
+        }
+        else {
+          setErrorMessage("Registration Failed")
+        }
+        errRef.current?.focus()
+      }
+    }
+
     return (
+      <>
+      {success ? (
+        // turn into react rlouter link
+          <section>
+              <h1>Success!</h1>
+              <p>
+                  <a href="#">Sign In</a>
+              </p>
+          </section>
+      ) : (
       <section>
         <p ref={errRef} className={errormessage ? "errmsg" : "offscreen"}>{errormessage}</p>
         <h1>Register </h1>
 
-        <form>
+        <form onSubmit={handleSubmit}>
 
           <label htmlFor="username">
             Username: 
@@ -235,7 +300,8 @@ function Register() {
                             <FontAwesomeIcon icon={faInfoCircle} />
                             <br/>
                             1 - 24 characters<br/>
-                            Letters only. <br/>
+                            Must begin with a letter<br/>
+                            Letters and spaces only
                             
           </p>   
 
@@ -257,7 +323,9 @@ function Register() {
                             <FontAwesomeIcon icon={faInfoCircle} />
                             <br/>
                             1 - 24 characters<br/>
-                            Letters only. <br/>
+                            Must begin with a letter<br/>
+                            Letters and spaces only
+
                             
           </p>      
 
@@ -291,7 +359,6 @@ function Register() {
             id="creditcard"
             onChange={(e) => setCc(e.target.value)}
             value={creditcard}
-            required
             onFocus={() => setCcFocus(true)}
             onBlur={() => setCcFocus(false)}
           />
@@ -311,7 +378,6 @@ function Register() {
             id="exp"
             onChange={(e) => setExp(e.target.value)}
             value={exp}
-            required
             onFocus={() => setExpFocus(true)}
             onBlur={() => setExpFocus(false)}
           />
@@ -331,7 +397,6 @@ function Register() {
             id="cvv"
             onChange={(e) => setCvv(e.target.value)}
             value={cvv}
-            required
             onFocus={() => setCvvFocus(true)}
             onBlur={() => setCvvFocus(false)}
           />
@@ -352,6 +417,7 @@ function Register() {
         </form>
 
       </section>
+      )}</>
     );
   }
 
