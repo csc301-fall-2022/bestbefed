@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import Item from "./item";
+import Button from "react-bootstrap/esm/Button";
+import styles from "./cart.module.css";
 
 class Cart extends Component {
   // hardcoded values of items for now, will grab from DB later
@@ -39,26 +41,79 @@ class Cart extends Component {
       },
     ],
   };
-
+  // handler for increase button
+  handleIncrease = (item) => {
+    // clone the array of items in our state
+    const items = [...this.state.items];
+    const index = items.indexOf(item);
+    items[index] = { ...item };
+    items[index].count++;
+    this.setState({ items });
+  };
+  // handler for decrease button
+  handleDecrease = (item) => {
+    // clone the array of items in our state
+    if (item.count > 0) {
+      const items = [...this.state.items];
+      const index = items.indexOf(item);
+      items[index] = { ...item };
+      items[index].count--;
+      this.setState({ items });
+    }
+  };
+  // handler for All button
+  handleAll = () => {
+    const items = this.state.items;
+    this.setState({ items });
+  };
   handleDelete = (itemId) => {
-    console.log("EH called", itemId);
+    // get all the items that don't have the id of the item that we are removing
+    const items = this.state.items.filter((i) => i.id !== itemId);
+    this.setState({ items });
   };
 
   render() {
     return (
       <div>
         {/* map the state to every item*/}
-        {this.state.items.map((item) => (
-          <Item
-            key={item.id}
-            itemName={item.itemName}
-            store={item.store}
-            price={item.price}
-            count={item.count}
-            imageUrl={item.imageUrl}
-            onDelete={this.handleDelete}
-          />
-        ))}
+        <div className={styles.items}>
+          {this.state.items.map((item) => (
+            <Item
+              key={item.id}
+              item={item}
+              onDelete={this.handleDelete}
+              onIncrease={this.handleIncrease}
+              onDecrease={this.handleDecrease}
+            />
+          ))}
+        </div>
+
+        {/* create some buttons on the right side of the screen that filter (we need to have 1 button for each store in the DB) */}
+        <div className={styles.filters}>
+          <Button variant="secondary" className="m-2" onClick={this.handleAll}>
+            All
+          </Button>
+          <Button
+            variant="secondary"
+            className="m-2"
+            onClick={this.handleFBFilter}
+          >
+            food basics
+          </Button>
+          <Button
+            variant="secondary"
+            className="m-2"
+            onClick={this.handleNFFilter}
+          >
+            no frills
+          </Button>
+          <Button variant="secondary" className="m-2">
+            walmart
+          </Button>
+          <Button variant="secondary" className="m-2">
+            shoppers drug mart
+          </Button>
+        </div>
       </div>
     );
   }
