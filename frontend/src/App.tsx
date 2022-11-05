@@ -1,8 +1,12 @@
+import { Route, Routes } from "react-router-dom";
+import { AuthProvider } from "react-auth-kit";
+import { BrowserRouter } from "react-router-dom";
+
 import Login from "./Login/Login";
 import Register from "./Register/Register";
-import { AuthProvider } from "react-auth-kit";
 
 function App() {
+  // Need to make <Home /> index and <Register /> have a path of path="/register"
   return (
     <AuthProvider
       authType={"cookie"}
@@ -10,10 +14,12 @@ function App() {
       cookieDomain={window.location.hostname}
       cookieSecure={window.location.protocol === "https:"}
     >
-      <main className="App">
-        {/* <Register /> */}
-        <Register />
-      </main>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+        </Routes>
+      </BrowserRouter>
     </AuthProvider>
   );
 }

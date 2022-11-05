@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   faCarrot,
   faTrashCan,
@@ -7,6 +8,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "../api/axios";
 import "./Register.css";
+import { Link } from "react-router-dom";
 
 const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
@@ -81,6 +83,14 @@ function Register() {
   // for backend and submission validation
   const [errormessage, setErrorMessage] = useState("");
   const [success, setSuccess] = useState(false);
+
+  // For redirection after a successful login
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (success) {
+      navigate("/login");
+    }
+  }, [success]);
 
   useEffect(() => {
     userRef.current?.focus();
@@ -522,7 +532,7 @@ function Register() {
             <br />
             <span className="line">
               {/*put router link here*/}
-              <a href="#">Login here</a>
+              <Link to="/login">Login here</Link>
             </span>
           </form>
         </section>

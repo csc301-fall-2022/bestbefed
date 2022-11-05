@@ -1,0 +1,62 @@
+.map-container {
+  z-index: 0;
+  height: 100vh;
+  width: 100vw;
+}
+
+.mapboxgl-control-container {
+  display: none;
+}
+
+.foreground {
+  z-index: 1;
+}
+
+.left-menu {
+  background-color: whitesmoke;
+  padding: 1em;
+}
+
+.rounded-circle {
+  width: 2.75em;
+  height: 2.75em;
+  text-align: center;
+  padding: 5px 5px;
+  font-size: 1.2em;
+  line-height: 1.428571429;
+  border-radius: 15px;
+}
+
+p .svg-inline--fa {
+  margin: auto 1em auto 0.5em;
+}
+
+.store-list {
+  mask-image: linear-gradient(
+    to bottom,
+    black calc(100% - 1em),
+    transparent 100%
+  );
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
+
+/* Works on Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: grey transparent;
+}
+
+/* Works on Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 0.6em;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: lightgray;
+  border-radius: 20px;
+}
