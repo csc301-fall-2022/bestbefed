@@ -9,24 +9,33 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Order = void 0;
+exports.CartItem = void 0;
 const typeorm_1 = require("typeorm");
+const Inventory_1 = require("./Inventory");
 const User_1 = require("./User");
-let Order = class Order extends typeorm_1.BaseEntity {
+let CartItem = class CartItem extends typeorm_1.BaseEntity {
 };
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
-], Order.prototype, "order_id", void 0);
+], CartItem.prototype, "item_id", void 0);
+__decorate([
+    (0, typeorm_1.Column)("int"),
+    __metadata("design:type", Number)
+], CartItem.prototype, "quantity", void 0);
 __decorate([
     (0, typeorm_1.Column)("date"),
     __metadata("design:type", Date)
-], Order.prototype, "order_date", void 0);
+], CartItem.prototype, "added_date", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => Inventory_1.Inventory, (inventory) => inventory.item_id),
+    __metadata("design:type", Inventory_1.Inventory)
+], CartItem.prototype, "cart_item", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => User_1.User, (user) => user.user_id),
     __metadata("design:type", User_1.User)
-], Order.prototype, "customer", void 0);
-Order = __decorate([
+], CartItem.prototype, "customer", void 0);
+CartItem = __decorate([
     (0, typeorm_1.Entity)()
-], Order);
-exports.Order = Order;
+], CartItem);
+exports.CartItem = CartItem;
