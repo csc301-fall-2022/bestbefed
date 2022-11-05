@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   faCarrot,
   faTrashCan,
@@ -81,6 +82,14 @@ function Register() {
   // for backend and submission validation
   const [errormessage, setErrorMessage] = useState("");
   const [success, setSuccess] = useState(false);
+
+  // For redirection after a successful login
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (success) {
+      navigate("/login");
+    }
+  }, [success]);
 
   useEffect(() => {
     userRef.current?.focus();
