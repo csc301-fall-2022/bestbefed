@@ -1,20 +1,21 @@
-import Login from "./Login/Login"
+import Login from "./Login/Login";
 import Register from "./Register/Register";
-import { AuthProvider } from 'react-auth-kit'
-
+import { AuthProvider } from "react-auth-kit";
 
 function App() {
   return (
-    <AuthProvider authType = {'cookie'}
-      authName={'_auth'}
+    <AuthProvider
+      authType={"cookie"}
+      authName={"_auth"}
       cookieDomain={window.location.hostname}
-      cookieSecure={window.location.protocol === "https:"}>
+      cookieSecure={window.location.protocol === "https:"}
+    >
       <main className="App">
+        {/* <Register /> */}
         <Register />
       </main>
-  </AuthProvider>
-
+    </AuthProvider>
   );
-} 
+}
 
 export default App;

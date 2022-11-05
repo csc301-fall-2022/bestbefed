@@ -31,7 +31,7 @@ const connectDB = async() => {
   }
 }
 
-// Serving up the landing page
+// Serving up the landing page - Change this to daniel's landing page
 app.get("/", (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, '../../frontend/build', 'index.html'));
 });

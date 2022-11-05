@@ -39,7 +39,7 @@ const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
         console.log(e);
     }
 });
-// Serving up the landing page
+// Serving up the landing page - Change this to daniel's landing page
 app.get("/", (req, res) => {
     res.sendFile(path_1.default.join(__dirname, '../../frontend/build', 'index.html'));
 });

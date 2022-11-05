@@ -75,9 +75,9 @@ const cleanUser = async (newUser: UserRequest) => {
     errors.numErrors += 1;
     errors["paymentInfo"].push("Please enter a valid credit card number!");
   }
-  if (!validator.isDate(newUser.paymentInfo.expiryDate)) {
-    errors["paymentInfo"].push("Please enter a valid card expiry date!");
-  }
+  //   if (!validator.isDate(newUser.paymentInfo.expiryDate)) {
+  //     errors["paymentInfo"].push("Please enter a valid card expiry date!");
+  //   }
   if (
     newUser.paymentInfo.cvv.length != 3 ||
     !validator.isNumeric(newUser.paymentInfo.cvv)
@@ -124,7 +124,7 @@ export const createUser = async (req: Request, res: Response) => {
     // Do not proceed with user creation if there are errors with entered data.
     if (isUserErrors(user)) {
       // Send back a 200 OK to acknowledge register attempt but send back errors
-      return res.send({ errors: user }).status(200);
+      return res.status(400).send({ errors: user });
     }
 
     // All user data was valid - user will now be created properly.
@@ -146,7 +146,7 @@ export const createUser = async (req: Request, res: Response) => {
     // Send back 201 upon successful creation
     res.status(201).json("New user created.");
   } catch (err) {
-    res.send(err).status(500);
+    res.status(500).send(err);
   }
 };
 
@@ -165,7 +165,7 @@ export const loginUser = async (req: Request, res: Response) => {
       username: req.body.username,
     });
     if (!user) {
-      return res.json("User does not exist").status(404);
+      return res.status(404).json("User does not exist");
     }
 
     // If user existed, verify password is correct.
@@ -174,7 +174,7 @@ export const loginUser = async (req: Request, res: Response) => {
       user.password
     );
     if (!validPassword) {
-      return res.json("Password is incorrect").status(400);
+      return res.status(400).json("Password is incorrect");
     }
 
     // Create the JWT to provide user with authentication.
@@ -186,7 +186,7 @@ export const loginUser = async (req: Request, res: Response) => {
     });
     res
       .cookie("access_token", token, {
-        httpOnly: true,
+        httpOnly: false,
       })
       .status(200)
       .json({
@@ -207,5 +207,5 @@ export const loginUser = async (req: Request, res: Response) => {
  */
 export const logoutUser = (req: Request, res: Response) => {
   res.clearCookie("access_token");
-  res.send("Logged out!").status(200);
+  res.status(200).send("Logged out!");
 };

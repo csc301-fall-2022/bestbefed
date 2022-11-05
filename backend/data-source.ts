@@ -9,10 +9,10 @@ import { Store } from "./entity/Store";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
-  host: "localhost",
+  host: "bestbefed-data.czbbb7d5g36e.us-east-2.rds.amazonaws.com",
   port: 5432,
   username: "postgres",
-  password: "postgres",
+  password: "12345678",
   database: "postgres",
   entities: [User, Order, Inventory, CartItem, OrderedItem, Store],
   synchronize: true,
