@@ -1,0 +1,32 @@
+.map-container {
+  z-index: 0;
+  height: 100vh;
+  width: 100vw;
+}
+
+.mapboxgl-control-container {
+  display: none;
+}
+
+.foreground {
+  z-index: 1;
+}
+
+.left-menu {
+  background-color: whitesmoke;
+  padding: 1em;
+}
+
+.rounded-circle {
+  width: 2.75em;
+  height: 2.75em;
+  text-align: center;
+  padding: 5px 5px;
+  font-size: 1.2em;
+  line-height: 1.428571429;
+  border-radius: 15px;
+}
+
+p .svg-inline--fa {
+  margin: auto 1em auto 0.5em;
+}
