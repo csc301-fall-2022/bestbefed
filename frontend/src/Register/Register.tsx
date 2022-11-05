@@ -8,6 +8,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "../api/axios";
 import "./Register.css";
+import { Link } from "react-router-dom";
 
 const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
@@ -531,7 +532,7 @@ function Register() {
             <br />
             <span className="line">
               {/*put router link here*/}
-              <a href="#">Login here</a>
+              <Link to="/login">Login here</Link>
             </span>
           </form>
         </section>
