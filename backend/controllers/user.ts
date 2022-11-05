@@ -75,9 +75,9 @@ const cleanUser = async (newUser: UserRequest) => {
     errors.numErrors += 1;
     errors["paymentInfo"].push("Please enter a valid credit card number!");
   }
-//   if (!validator.isDate(newUser.paymentInfo.expiryDate)) {
-//     errors["paymentInfo"].push("Please enter a valid card expiry date!");
-//   }
+  //   if (!validator.isDate(newUser.paymentInfo.expiryDate)) {
+  //     errors["paymentInfo"].push("Please enter a valid card expiry date!");
+  //   }
   if (
     newUser.paymentInfo.cvv.length != 3 ||
     !validator.isNumeric(newUser.paymentInfo.cvv)
@@ -146,7 +146,7 @@ export const createUser = async (req: Request, res: Response) => {
     // Send back 201 upon successful creation
     res.status(201).json("New user created.");
   } catch (err) {
-        res.status(500).send(err);
+    res.status(500).send(err);
   }
 };
 
@@ -186,7 +186,7 @@ export const loginUser = async (req: Request, res: Response) => {
     });
     res
       .cookie("access_token", token, {
-        httpOnly: true,
+        httpOnly: false,
       })
       .status(200)
       .json({

@@ -174,7 +174,7 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         });
         res
             .cookie("access_token", token, {
-            httpOnly: true,
+            httpOnly: false,
         })
             .status(200)
             .json({
