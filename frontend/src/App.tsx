@@ -12,7 +12,7 @@ function App() {
     >
       <main className="App">
         {/* <Register /> */}
-        <Login />
+        <Register />
       </main>
     </AuthProvider>
   );
