@@ -9,24 +9,32 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Order = void 0;
+exports.Inventory = void 0;
 const typeorm_1 = require("typeorm");
-const User_1 = require("./User");
-let Order = class Order extends typeorm_1.BaseEntity {
+const Store_1 = require("./Store");
+let Inventory = class Inventory extends typeorm_1.BaseEntity {
 };
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
-], Order.prototype, "order_id", void 0);
+], Inventory.prototype, "item_id", void 0);
 __decorate([
-    (0, typeorm_1.Column)("date"),
-    __metadata("design:type", Date)
-], Order.prototype, "order_date", void 0);
+    (0, typeorm_1.ManyToOne)(() => Store_1.Store, (store) => store.store_id),
+    __metadata("design:type", Store_1.Store)
+], Inventory.prototype, "store", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => User_1.User, (user) => user.user_id),
-    __metadata("design:type", User_1.User)
-], Order.prototype, "customer", void 0);
-Order = __decorate([
+    (0, typeorm_1.Column)("varchar", { length: 255 }),
+    __metadata("design:type", String)
+], Inventory.prototype, "item_name", void 0);
+__decorate([
+    (0, typeorm_1.Column)("float"),
+    __metadata("design:type", Number)
+], Inventory.prototype, "price", void 0);
+__decorate([
+    (0, typeorm_1.Column)("int"),
+    __metadata("design:type", Number)
+], Inventory.prototype, "quantity", void 0);
+Inventory = __decorate([
     (0, typeorm_1.Entity)()
-], Order);
-exports.Order = Order;
+], Inventory);
+exports.Inventory = Inventory;

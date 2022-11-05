@@ -31,6 +31,11 @@ const connectDB = async() => {
   }
 }
 
+// Serving up the landing page
+app.get("/", (req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, '../../frontend/build', 'index.html'));
+});
+
 // Example of Auth middleware - the second argument is our auth function that verifies user is logged in before proceeding
 app.get('/api', isAuthenticated, (req: Request, res: Response) => {
   res.send('<h1>Hello from API endpoint!<h1>');
