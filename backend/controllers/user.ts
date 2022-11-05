@@ -123,7 +123,7 @@ export const createUser = async (req: Request, res: Response) => {
 
     // Do not proceed with user creation if there are errors with entered data.
     if (isUserErrors(user)) {
-      // Send back a 200 OK to acknowledge register attempt but send back errors
+      // Send back a 400 response to acknowledge register attempt but send back errors
       return res.status(400).send({ errors: user });
     }
 

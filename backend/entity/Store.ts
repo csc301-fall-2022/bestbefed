@@ -4,8 +4,10 @@ import {
   Column,
   BeforeInsert,
   BaseEntity,
+  Index,
 } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
+import { Geometry, Point } from "geojson";
 
 @Entity()
 export class Store extends BaseEntity {
@@ -27,6 +29,17 @@ export class Store extends BaseEntity {
 
   @Column("date")
   create_date!: Date;
+
+  @Index({ spatial: true })
+  @Column({
+    type: "geography",
+    spatialFeatureType: "Point",
+    srid: 4326,
+  })
+  location!: Point;
+
+  @Column("text")
+  address!: string;
 
   @BeforeInsert()
   generateId() {

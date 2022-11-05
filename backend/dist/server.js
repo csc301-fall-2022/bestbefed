@@ -19,6 +19,7 @@ require("dotenv/config");
 require("reflect-metadata");
 // Local imports
 const user_1 = __importDefault(require("./routes/user"));
+const store_1 = __importDefault(require("./routes/store"));
 const data_source_1 = require("./data-source");
 const auth_1 = require("./controllers/auth");
 const app = (0, express_1.default)();
@@ -29,6 +30,7 @@ app.use((0, cookie_parser_1.default)());
 app.use(express_1.default.json());
 // Routing middleware.
 app.use("/user", user_1.default);
+app.use("/store", store_1.default);
 // Initializes connection to DB using TypeORM when called.
 const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -41,11 +43,11 @@ const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
 });
 // Serving up the landing page - Change this to daniel's landing page
 app.get("/", (req, res) => {
-    res.sendFile(path_1.default.join(__dirname, '../../frontend/build', 'index.html'));
+    res.sendFile(path_1.default.join(__dirname, "../../frontend/build", "index.html"));
 });
 // Example of Auth middleware - the second argument is our auth function that verifies user is logged in before proceeding
-app.get('/api', auth_1.isAuthenticated, (req, res) => {
-    res.send('<h1>Hello from API endpoint!<h1>');
+app.get("/api", auth_1.isAuthenticated, (req, res) => {
+    res.send("<h1>Hello from API endpoint!<h1>");
 });
 app.listen(port, () => {
     connectDB();
