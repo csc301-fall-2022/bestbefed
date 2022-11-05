@@ -1,15 +1,12 @@
 import React, { useState } from "react";
-import { Container, Col, Row, Button, Offcanvas } from "react-bootstrap";
+import { Container, Col, Row, Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBars,
   faShoppingCart,
-  faCog,
-  faRightFromBracket,
-  faUser,
-  faList,
   faSearch,
 } from "@fortawesome/free-solid-svg-icons";
+import MenuSlideIn from "./MenuSlideIn";
 
 function FloatingUI() {
   const [showMenu, setShowMenu] = useState(false);
@@ -27,7 +24,10 @@ function FloatingUI() {
       fluid
     >
       <Row className="h-100 g-0">
-        <Col className="col-12 col-md-7 col-lg-6 col-xl-5 text-start bg-white p-4 rounded-4 pe-auto">
+        <Col
+          className="col-12 col-md-7 col-lg-6 col-xl-5 text-start bg-white p-4 rounded-4 pe-auto"
+          id="left-panel"
+        >
           <Container className="d-flex p-0 justify-content-between">
             <h2>Nearby</h2>
             <Button variant="outline-dark" className="rounded-5 px-4">
@@ -60,25 +60,7 @@ function FloatingUI() {
           </Row>
         </Col>
       </Row>
-      <Offcanvas show={showMenu} onHide={handleCloseMenu} placement="end">
-        <Offcanvas.Header closeButton>
-          <Offcanvas.Title>Menu</Offcanvas.Title>
-        </Offcanvas.Header>
-        <Offcanvas.Body>
-          <p>
-            <FontAwesomeIcon icon={faUser} size="lg" /> Profile
-          </p>
-          <p>
-            <FontAwesomeIcon icon={faList} size="lg" /> Order History
-          </p>
-          <p>
-            <FontAwesomeIcon icon={faCog} size="lg" /> Settings
-          </p>
-          <p>
-            <FontAwesomeIcon icon={faRightFromBracket} size="lg" /> Log out
-          </p>
-        </Offcanvas.Body>
-      </Offcanvas>
+      <MenuSlideIn showMenu={showMenu} handleCloseMenu={handleCloseMenu} />
     </Container>
   );
 }

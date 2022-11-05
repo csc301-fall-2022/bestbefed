@@ -1,4 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
+import { Button } from "react-bootstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faLocationCrosshairs } from "@fortawesome/free-solid-svg-icons";
 import "mapbox-gl/dist/mapbox-gl.css";
 import mapboxgl from "mapbox-gl";
 mapboxgl.accessToken =
@@ -7,24 +10,25 @@ mapboxgl.accessToken =
 function Map() {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const [lng, setLng] = useState(-79.4);
-  const [lat, setLat] = useState(43.64);
+  const [mapLocation, setMapLocation] = useState<mapboxgl.LngLat>(
+    new mapboxgl.LngLat(-79.38198, 43.64847)
+  );
+  let curLocation: mapboxgl.LngLat | null = null;
 
-  // Get user location
-  useEffect(() => {
+  const fetchLocation = async () => {
     if (navigator.geolocation) {
-      navigator.permissions
-        .query({ name: "geolocation" })
-        .then(function (result) {
-          if (result.state !== "denied") {
-            navigator.geolocation.getCurrentPosition((position) => {
-              setLng(position.coords.longitude);
-              setLat(position.coords.latitude);
-            });
-          }
+      let result = await navigator.permissions.query({ name: "geolocation" });
+      if (result.state !== "denied") {
+        navigator.geolocation.getCurrentPosition((position) => {
+          curLocation = new mapboxgl.LngLat(
+            position.coords.longitude,
+            position.coords.latitude
+          );
+          setMapLocation(curLocation);
         });
+      }
     }
-  });
+  };
 
   // Create map and add data
   useEffect(() => {
@@ -32,8 +36,14 @@ function Map() {
     map.current = new mapboxgl.Map({
       container: mapContainer.current as HTMLDivElement,
       style: "mapbox://styles/mapbox/streets-v11",
-      center: [lng as number, lat as number],
-      zoom: 12,
+      center: mapLocation,
+      zoom: 13,
+    });
+    map.current.setPadding({
+      left: (document.querySelector("#left-panel") as HTMLElement)?.offsetWidth,
+      right: 0,
+      top: 0,
+      bottom: 0,
     });
 
     fetch(
@@ -59,11 +69,23 @@ function Map() {
   // Update map center any time lng/lat changes
   useEffect(() => {
     if (map.current) {
-      map.current.setCenter(new mapboxgl.LngLat(lng as number, lat as number));
+      map.current.panTo(mapLocation);
     }
-  }, [lng, lat]);
+  }, [mapLocation]);
 
-  return <div ref={mapContainer} className="map-container" />;
+  return (
+    <>
+      <div ref={mapContainer} className="map-container" />
+      <Button
+        variant="dark"
+        size="lg"
+        className="rounded-circle pe-auto position-absolute foreground bottom-0 end-0 m-3 d-none d-md-inline shadow"
+        onClick={fetchLocation}
+      >
+        <FontAwesomeIcon icon={faLocationCrosshairs} />
+      </Button>
+    </>
+  );
 }
 
 export default Map;
