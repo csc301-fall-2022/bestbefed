@@ -30,3 +30,33 @@
 p .svg-inline--fa {
   margin: auto 1em auto 0.5em;
 }
+
+.store-list {
+  mask-image: linear-gradient(
+    to bottom,
+    black calc(100% - 1em),
+    transparent 100%
+  );
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
+
+/* Works on Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: grey transparent;
+}
+
+/* Works on Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 0.6em;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: lightgray;
+  border-radius: 20px;
+}

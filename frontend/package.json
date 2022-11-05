@@ -18,6 +18,7 @@
     "@types/react-bootstrap": "^0.32.31",
     "@types/react-dom": "^18.0.8",
     "bootstrap": "^5.2.2",
+    "lorem-ipsum": "^2.0.8",
     "mapbox-gl": "^2.10.0",
     "react": "^18.2.0",
     "react-bootstrap": "^2.5.0",
