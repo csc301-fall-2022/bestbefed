@@ -77,9 +77,9 @@ const cleanUser = (newUser) => __awaiter(void 0, void 0, void 0, function* () {
         errors.numErrors += 1;
         errors["paymentInfo"].push("Please enter a valid credit card number!");
     }
-    if (!validator_1.default.isDate(newUser.paymentInfo.expiryDate)) {
-        errors["paymentInfo"].push("Please enter a valid card expiry date!");
-    }
+    //   if (!validator.isDate(newUser.paymentInfo.expiryDate)) {
+    //     errors["paymentInfo"].push("Please enter a valid card expiry date!");
+    //   }
     if (newUser.paymentInfo.cvv.length != 3 ||
         !validator_1.default.isNumeric(newUser.paymentInfo.cvv)) {
         errors.numErrors += 1;
@@ -120,7 +120,7 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         // Do not proceed with user creation if there are errors with entered data.
         if (isUserErrors(user)) {
             // Send back a 200 OK to acknowledge register attempt but send back errors
-            return res.send({ errors: user }).status(200);
+            return res.status(400).send({ errors: user });
         }
         // All user data was valid - user will now be created properly.
         const salt = bcryptjs_1.default.genSaltSync(10);
@@ -139,7 +139,7 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         res.status(201).json("New user created.");
     }
     catch (err) {
-        res.send(err).status(500);
+        res.status(500).send(err);
     }
 });
 exports.createUser = createUser;
@@ -158,12 +158,12 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             username: req.body.username,
         });
         if (!user) {
-            return res.json("User does not exist").status(404);
+            return res.status(404).json("User does not exist");
         }
         // If user existed, verify password is correct.
         const validPassword = yield bcryptjs_1.default.compare(req.body.password, user.password);
         if (!validPassword) {
-            return res.json("Password is incorrect").status(400);
+            return res.status(400).json("Password is incorrect");
         }
         // Create the JWT to provide user with authentication.
         const payload = {
@@ -196,6 +196,6 @@ exports.loginUser = loginUser;
  */
 const logoutUser = (req, res) => {
     res.clearCookie("access_token");
-    res.send("Logged out!").status(200);
+    res.status(200).send("Logged out!");
 };
 exports.logoutUser = logoutUser;

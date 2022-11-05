@@ -7,7 +7,7 @@ import axios from "../api/axios";
 
 const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
-const LOGIN_URL = '/login'
+const LOGIN_URL = '/user/login'
 
 
 function Login() {

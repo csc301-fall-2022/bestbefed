@@ -10,7 +10,8 @@ function App() {
       cookieDomain={window.location.hostname}
       cookieSecure={window.location.protocol === "https:"}>
       <main className="App">
-        <Register />
+        {/* <Register /> */}
+        <Login />
       </main>
   </AuthProvider>
 

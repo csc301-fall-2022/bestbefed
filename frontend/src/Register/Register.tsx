@@ -164,12 +164,12 @@ function Register() {
         const request_data = {
           username: username,
           password: password,
-          firstname: firstname,
-          lastname: lastname,
+          firstName: firstname,
+          lastName: lastname,
           email: email,
           paymentInfo: {
-            creditcard: creditcard,
-            expirydate: exp,
+            creditCard: creditcard,
+            expiryDate: exp,
             cvv: cvv
           }
         }
