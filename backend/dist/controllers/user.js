@@ -22,7 +22,7 @@ const User_1 = require("../entity/User");
 const userRepository = data_source_1.AppDataSource.getRepository(User_1.User);
 // Helper functions
 const isUserErrors = (obj) => {
-    return 'numErrors' in obj;
+    return "numErrors" in obj;
 };
 /**
  * Takes in the request body of a "create user" request, validates and sanitizes the data.
@@ -32,6 +32,7 @@ const isUserErrors = (obj) => {
  * @return {userRequest | userErrors } Validated.
  */
 const cleanUser = (newUser) => __awaiter(void 0, void 0, void 0, function* () {
+    // consider implementing try-catch?
     // Takes in the request body of a "create user" request, validates and sanitizes the data
     const errors = {
         numErrors: 0,
@@ -40,7 +41,7 @@ const cleanUser = (newUser) => __awaiter(void 0, void 0, void 0, function* () {
         firstName: "",
         lastName: "",
         email: "",
-        paymentInfo: []
+        paymentInfo: [],
     };
     // Check if a user with this username exists in the database
     const existingUser = yield userRepository.findOneBy({
@@ -48,36 +49,39 @@ const cleanUser = (newUser) => __awaiter(void 0, void 0, void 0, function* () {
     });
     if (existingUser) {
         errors.numErrors += 1;
-        errors['username'] = "Username already exists! Please choose something else.";
+        errors["username"] =
+            "Username already exists! Please choose something else.";
     }
     // Verify that password is strong enough
     if (!validator_1.default.isStrongPassword(newUser.password)) {
         errors.numErrors += 1;
-        errors['password'] = "Password is too weak! You need to have at least 8 characters with 1 uppercase, 1 lowercase, 1 number, and 1 symbol!";
+        errors["password"] =
+            "Password is too weak! You need to have at least 8 characters with 1 uppercase, 1 lowercase, 1 number, and 1 symbol!";
     }
     // Check for valid email address
     if (!validator_1.default.isEmail(newUser.email)) {
         errors.numErrors += 1;
-        errors['email'] = "Please enter a valid email address.";
+        errors["email"] = "Please enter a valid email address.";
     }
     // Check that first and last names aren't empty
     if (newUser.firstName.length == 0) {
         errors.numErrors += 1;
-        errors['firstName'] = "Please enter your first name.";
+        errors["firstName"] = "Please enter your first name.";
     }
     if (newUser.lastName.length == 0) {
         errors.numErrors += 1;
-        errors['lastName'] = "Please enter your last name.";
+        errors["lastName"] = "Please enter your last name.";
     }
     // Check that every piece of the payment info is valid
     if (!validator_1.default.isCreditCard(newUser.paymentInfo.creditCard)) {
         errors.numErrors += 1;
         errors["paymentInfo"].push("Please enter a valid credit card number!");
     }
-    if (!validator_1.default.isDate(newUser.paymentInfo.expiryDate)) {
-        errors["paymentInfo"].push("Please enter a valid card expiry date!");
-    }
-    if (newUser.paymentInfo.cvv.length != 3 || !validator_1.default.isNumeric(newUser.paymentInfo.cvv)) {
+    //   if (!validator.isDate(newUser.paymentInfo.expiryDate)) {
+    //     errors["paymentInfo"].push("Please enter a valid card expiry date!");
+    //   }
+    if (newUser.paymentInfo.cvv.length != 3 ||
+        !validator_1.default.isNumeric(newUser.paymentInfo.cvv)) {
         errors.numErrors += 1;
         errors["paymentInfo"].push("Please enter a valid CVV code for your credit card.");
     }
@@ -110,13 +114,13 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 creditCard: req.body.paymentInfo.creditCard.trim(),
                 expiryDate: req.body.paymentInfo.expiryDate,
                 cvv: req.body.paymentInfo.cvv.trim(),
-            }
+            },
         };
         const user = yield cleanUser(userData);
         // Do not proceed with user creation if there are errors with entered data.
         if (isUserErrors(user)) {
             // Send back a 200 OK to acknowledge register attempt but send back errors
-            return res.send({ errors: user }).status(200);
+            return res.status(400).send({ errors: user });
         }
         // All user data was valid - user will now be created properly.
         const salt = bcryptjs_1.default.genSaltSync(10);
@@ -127,17 +131,15 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         newUser.lastName = user.lastName;
         newUser.email = user.email;
         newUser.password = hashedPass;
-        newUser.emailVerified = false;
-        newUser.createDate = new Date();
-        newUser.orders = new Array;
-        newUser.cart = new Array;
-        newUser.paymentInfo = user.paymentInfo; // this is bad practice - but we know it'll implement the interface if we get here
+        newUser.email_verified = false;
+        newUser.create_date = new Date();
+        newUser.payment_info = user.paymentInfo; // this is bad practice - but we know it'll implement the interface if we get here
         yield userRepository.save(newUser);
         // Send back 201 upon successful creation
         res.status(201).json("New user created.");
     }
     catch (err) {
-        res.send(err).status(500);
+        res.status(500).send(err);
     }
 });
 exports.createUser = createUser;
@@ -153,26 +155,30 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Try to query and store user corresponding to entered username.
         const user = yield userRepository.findOneBy({
-            username: req.body.username
+            username: req.body.username,
         });
         if (!user) {
-            return res.json("User does not exist").status(404);
+            return res.status(404).json("User does not exist");
         }
         // If user existed, verify password is correct.
         const validPassword = yield bcryptjs_1.default.compare(req.body.password, user.password);
         if (!validPassword) {
-            return res.json("Password is incorrect").status(400);
+            return res.status(400).json("Password is incorrect");
         }
         // Create the JWT to provide user with authentication.
         const payload = {
-            id: user.id
+            id: user.user_id,
         };
-        // <string>process.env.SECRET
-        const token = jsonwebtoken_1.default.sign(payload, process.env.SECRET, { expiresIn: "1d" });
-        res.cookie('access_token', token, {
-            httpOnly: true,
-        }).status(200).json({
-            username: user.username
+        const token = jsonwebtoken_1.default.sign(payload, process.env.SECRET, {
+            expiresIn: "1d",
+        });
+        res
+            .cookie("access_token", token, {
+            httpOnly: false,
+        })
+            .status(200)
+            .json({
+            username: user.username,
         });
     }
     catch (err) {
@@ -190,6 +196,6 @@ exports.loginUser = loginUser;
  */
 const logoutUser = (req, res) => {
     res.clearCookie("access_token");
-    res.send("Logged out!").status(200);
+    res.status(200).send("Logged out!");
 };
 exports.logoutUser = logoutUser;

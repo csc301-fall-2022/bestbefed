@@ -21,15 +21,16 @@ const isAuthenticated = (req, res, next) => {
         return res.send("Unauthorized - request not authenticated.").status(401);
     }
     // Verify that the cookie is valid
-    // <string>process.env.SECRET,
     jsonwebtoken_1.default.verify(token, process.env.SECRET, (err, payload) => {
         if (err) {
             // Ideally this should prompt a redirect to the User login page
-            return res.json("Session token is invalid. Please login again.").status(403);
+            return res
+                .json("Session token is invalid. Please login again.")
+                .status(403);
         }
         // Successful JWT Verify decodes the payload, i.e., we will have access to the user's uuid
         req.user = {
-            id: payload.id
+            id: payload.id,
         };
         next();
     });
