@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSignIn } from "react-auth-kit";
 import "./Login.css";
 import axios from "../api/axios";
+import { Link } from "react-router-dom";
 
 const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
@@ -200,8 +201,7 @@ function Login() {
             Not a member?
             <br />
             <span className="line">
-              {/*routing stuff*/}
-              <a href="#">Sign up here</a>
+              <Link to="/register">Sign up here</Link>
             </span>
           </form>
         </section>
