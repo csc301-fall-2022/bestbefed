@@ -42,6 +42,19 @@ __decorate([
     __metadata("design:type", Date)
 ], Store.prototype, "create_date", void 0);
 __decorate([
+    (0, typeorm_1.Index)({ spatial: true }),
+    (0, typeorm_1.Column)({
+        type: "geography",
+        spatialFeatureType: "Point",
+        srid: 4326,
+    }),
+    __metadata("design:type", Object)
+], Store.prototype, "location", void 0);
+__decorate([
+    (0, typeorm_1.Column)("text"),
+    __metadata("design:type", String)
+], Store.prototype, "address", void 0);
+__decorate([
     (0, typeorm_1.BeforeInsert)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
