@@ -1,5 +1,5 @@
-import axios from 'axios'
+import axios from "axios";
 
 export default axios.create({
-    baseURL: 'http://localhost:8000'
+  baseURL: "http://bestbefed-env.eba-gfsfbp2h.us-east-2.elasticbeanstalk.com/",
 });
