@@ -24,7 +24,7 @@ const auth_1 = require("./controllers/auth");
 const app = (0, express_1.default)();
 const port = process.env.PORT || 8000;
 const cors = require("cors");
-app.use(cors({ origin: "http://localhost:3000" }));
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 // Middleware via External Libraries.
 app.use((0, cookie_parser_1.default)());
 app.use(express_1.default.json());
