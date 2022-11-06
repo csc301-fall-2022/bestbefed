@@ -189,7 +189,11 @@ export const loginUser = async (req: Request, res: Response) => {
     };
     const token = jwt.sign(
       payload,
-      <string>(process.env.PRODUCTION ? process.env.SECRET : "hellomyfriend"),
+      <string>(
+        (process.env.PRODUCTION == "true"
+          ? process.env.SECRET
+          : "hellomyfriend")
+      ),
       {
         expiresIn: "1d",
       }

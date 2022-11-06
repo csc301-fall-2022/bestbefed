@@ -24,7 +24,9 @@ export const isAuthenticated = (
   // Verify that the cookie is valid
   jwt.verify(
     token,
-    <string>(process.env.PRODUCTION ? process.env.SECRET : "hellomyfriend"),
+    <string>(
+      (process.env.PRODUCTION == "true" ? process.env.SECRET : "hellomyfriend")
+    ),
     (err: any, payload: any) => {
       if (err) {
         // Ideally this should prompt a redirect to the User login page

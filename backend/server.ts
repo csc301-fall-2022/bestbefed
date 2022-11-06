@@ -40,9 +40,10 @@ app.get("*", (req, res) => {
 const connectDB = async () => {
   try {
     await AppDataSource.initialize();
-    let host = process.env.PRODUCTION
-      ? "bestbefed-data.czbbb7d5g36e.us-east-2.rds.amazonaws.com"
-      : "localhost";
+    let host =
+      process.env.PRODUCTION == "true"
+        ? "bestbefed-data.czbbb7d5g36e.us-east-2.rds.amazonaws.com"
+        : "localhost";
     console.log(`⚡️[server]: Connection to database established (${host})`);
   } catch (e) {
     console.log(e);
