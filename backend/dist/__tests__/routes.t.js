@@ -23,25 +23,11 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/', user_1.default);
 (0, globals_1.describe)('Test User Routes', function () {
-    // describe('POST /users', function() {
-    //   it('responds with json', function(done) {
-    //     request(app)
-    //       .post('/users')
-    //       .send({name: 'john'})
-    //       .set('Accept', 'application/json')
-    //       .expect('Content-Type', /json/)
-    //       .expect(200)
-    //       .end(function(err, res) {
-    //         if (err) return done(err);
-    //         return done();
-    //       });
-    //   });
-    // });
     (0, globals_1.test)('POST to /user/', () => __awaiter(this, void 0, void 0, function* () {
         // Store the response from the user creation
         const res = yield request(app).post('/')
             .send({
-            username: "mikehawkislarge1234",
+            username: "heyhellotesttest",
             password: "IHateMyLif3$",
             firstName: "Matty",
             lastName: "P",
