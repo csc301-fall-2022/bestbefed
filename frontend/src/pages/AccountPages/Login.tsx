@@ -6,7 +6,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSignIn, useIsAuthenticated } from "react-auth-kit";
-import "./Login.css";
+import "./styles.css";
 import axios from "../../api/axios";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -101,91 +101,93 @@ function Login() {
   };
 
   return (
-    <section>
-      <p ref={errRef} className={errormessage ? "errmsg" : "offscreen"}>
-        {errormessage}
-      </p>
-      <h1>Login </h1>
+    <div className="form-container">
+      <section>
+        <p ref={errRef} className={errormessage ? "errmsg" : "offscreen"}>
+          {errormessage}
+        </p>
+        <h1>Login </h1>
 
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="username">
-          Username:
-          <FontAwesomeIcon
-            icon={faCarrot}
-            className={validUsername ? "valid" : "hide"}
+        <form onSubmit={handleSubmit}>
+          <label htmlFor="username">
+            Username:
+            <FontAwesomeIcon
+              icon={faCarrot}
+              className={validUsername ? "valid" : "hide"}
+            />
+            <FontAwesomeIcon
+              icon={faTrashCan}
+              className={validUsername || !username ? "hide" : "invalid"}
+            />
+          </label>
+          <input
+            type="text"
+            id="username"
+            ref={userRef}
+            autoComplete="off"
+            onChange={(e) => setUsername(e.target.value)}
+            value={username}
+            required
+            onFocus={() => setUsernameFocus(true)}
+            onBlur={() => setUsernameFocus(false)}
           />
-          <FontAwesomeIcon
-            icon={faTrashCan}
-            className={validUsername || !username ? "hide" : "invalid"}
+          <p
+            className={
+              focusedOnUsername && username && !validUsername
+                ? "instructions"
+                : "offscreen"
+            }
+          >
+            <FontAwesomeIcon icon={faInfoCircle} />
+            <br />
+            4 - 24 characters
+            <br />
+            Begins with a letter. <br />
+            Letters, numbers, underscores and hyphens only.
+          </p>
+          <label htmlFor="password">
+            Password:
+            <FontAwesomeIcon
+              icon={faCarrot}
+              className={validPassword ? "valid" : "hide"}
+            />
+            <FontAwesomeIcon
+              icon={faTrashCan}
+              className={validPassword || !password ? "hide" : "invalid"}
+            />
+          </label>
+          <input
+            type="password"
+            id="password"
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            onFocus={() => setPasswordFocus(true)}
+            onBlur={() => setPasswordFocus(false)}
           />
-        </label>
-        <input
-          type="text"
-          id="username"
-          ref={userRef}
-          autoComplete="off"
-          onChange={(e) => setUsername(e.target.value)}
-          value={username}
-          required
-          onFocus={() => setUsernameFocus(true)}
-          onBlur={() => setUsernameFocus(false)}
-        />
-        <p
-          className={
-            focusedOnUsername && username && !validUsername
-              ? "instructions"
-              : "offscreen"
-          }
-        >
-          <FontAwesomeIcon icon={faInfoCircle} />
+          <p
+            className={
+              focusedOnPassword && !validPassword ? "instructions" : "offscreen"
+            }
+          >
+            <FontAwesomeIcon icon={faInfoCircle} />
+            <br />
+            8 - 24 characters
+            <br />
+            Includes an uppercase and lowercase letter,
+            <br />a letter and a number.
+          </p>
+          <button disabled={!validUsername || !validPassword ? true : false}>
+            {" "}
+            Fight Food Waste{" "}
+          </button>
+          Not a member?
           <br />
-          4 - 24 characters
-          <br />
-          Begins with a letter. <br />
-          Letters, numbers, underscores and hyphens only.
-        </p>
-        <label htmlFor="password">
-          Password:
-          <FontAwesomeIcon
-            icon={faCarrot}
-            className={validPassword ? "valid" : "hide"}
-          />
-          <FontAwesomeIcon
-            icon={faTrashCan}
-            className={validPassword || !password ? "hide" : "invalid"}
-          />
-        </label>
-        <input
-          type="password"
-          id="password"
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          onFocus={() => setPasswordFocus(true)}
-          onBlur={() => setPasswordFocus(false)}
-        />
-        <p
-          className={
-            focusedOnPassword && !validPassword ? "instructions" : "offscreen"
-          }
-        >
-          <FontAwesomeIcon icon={faInfoCircle} />
-          <br />
-          8 - 24 characters
-          <br />
-          Includes an uppercase and lowercase letter,
-          <br />a letter and a number.
-        </p>
-        <button disabled={!validUsername || !validPassword ? true : false}>
-          {" "}
-          Fight Food Waste{" "}
-        </button>
-        Not a member?
-        <br />
-        <span className="line">
-          <Link to="/register">Sign up here</Link>
-        </span>
-      </form>
-    </section>
+          <span className="line">
+            <Link to="/register">Sign up here</Link>
+          </span>
+        </form>
+      </section>
+    </div>
   );
 }
 

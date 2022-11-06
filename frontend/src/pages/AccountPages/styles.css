@@ -1,5 +1,14 @@
 @import url("https://fonts.googleapis.com/css2?family=Nunito&display=swap");
 
+.form-container {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: wheat;
+}
+
 section {
   width: 100%;
   max-width: 420px;
@@ -8,7 +17,10 @@ section {
   flex-direction: column;
   justify-content: flex-start;
   padding: 1rem;
+  margin: 1em;
   background-color: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  border-radius: 1em;
 }
 
 form {
@@ -26,12 +38,14 @@ a:visited {
 
 input[type="text"],
 input[type="password"],
+input[type="email"],
 button,
 textarea {
   font-family: "Nunito", sans-serif;
   font-size: 22px;
   padding: 0.25rem;
   border-radius: 0.5rem;
+  border: none;
 }
 
 label,
