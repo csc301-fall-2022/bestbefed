@@ -26,6 +26,7 @@ function StoreList() {
       }
     );
     setStores(data);
+    console.log(data[0]["store_name"]);
   };
 
   useEffect(() => {
@@ -34,10 +35,10 @@ function StoreList() {
 
   return (
     <Container className="flex-grow-1 store-list px-0">
-      {stores.map(({ address, store_name, distance, description }) => {
+      {stores.map(({ address, storeName, distance, description }) => {
         return (
           <StoreListItem
-            name={store_name}
+            name={storeName}
             category={Math.random() < 0.5 ? "Grocery" : "Convenience"}
             distance={distance}
             description={address}

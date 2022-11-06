@@ -80,7 +80,6 @@ const fetchStores = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         const user_location = req.body.location;
         // get the stores from database
         const stores = yield storeRepository.find();
-        console.log(stores);
         const storeInfo = stores.map((store) => {
             return {
                 storeName: store.store_name,
