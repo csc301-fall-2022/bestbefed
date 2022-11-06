@@ -20,7 +20,6 @@ const storeRepository = AppDataSource.getRepository(Store);
  */
 export const createStore = async (req: Request, res: Response) => {
   try {
-    console.log("store started");
     const storeData: StoreRequest = {
       storeName: (<any>req.body).storeName.trim(),
       password: (<any>req.body).password.trim(),
@@ -34,19 +33,16 @@ export const createStore = async (req: Request, res: Response) => {
       // Send back a 400 response to acknowledge register attempt but send back errors
       return res.status(400).send({ errors: store });
     }
-    console.log("store is cleaned");
 
     // All store data was valid - store will now be created properly.
     const salt = bcrypt.genSaltSync(10);
     const hashedPass = bcrypt.hashSync(store.password, salt);
-    console.log("password hashed");
 
     const newStore: Store = new Store();
     const location: Point = {
       type: "Point",
       coordinates: [125.6, 10.1],
     };
-    console.log("point created");
     newStore.store_name = store.storeName;
     newStore.email = store.email;
     newStore.address = store.address;
@@ -54,10 +50,8 @@ export const createStore = async (req: Request, res: Response) => {
     newStore.password = hashedPass;
     newStore.email_verified = false;
     newStore.location = location;
-    console.log("store created");
 
     await storeRepository.save(newStore);
-    console.log("store saved");
 
     // Send back 201 upon successful creation
     res.status(201).json("New store created.");
@@ -171,7 +165,6 @@ const cleanStore = async (newStore: StoreRequest) => {
     email: "",
     address: "",
   };
-  console.log("cleaning started");
 
   // Check if a store with this name already exists in the database
   const existingStore: Store | null = await storeRepository.findOneBy({
@@ -198,9 +191,9 @@ const cleanStore = async (newStore: StoreRequest) => {
 
   // TODO: maybe make a better validation for address
   // Check for valid email address
-  if (!validator.isAlphanumeric(newStore.address)) {
+  if (validator.isEmpty(newStore.address)) {
     errors.numErrors += 1;
-    errors["address"] = "Please enter a valid address.";
+    errors["address"] = "Please enter an address.";
   }
 
   // Needs to return either the cleaned user or errors dictionary

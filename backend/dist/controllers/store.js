@@ -30,7 +30,6 @@ const storeRepository = data_source_1.AppDataSource.getRepository(Store_1.Store)
  */
 const createStore = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log("store started");
         const storeData = {
             storeName: req.body.storeName.trim(),
             password: req.body.password.trim(),
@@ -43,17 +42,14 @@ const createStore = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             // Send back a 400 response to acknowledge register attempt but send back errors
             return res.status(400).send({ errors: store });
         }
-        console.log("store is cleaned");
         // All store data was valid - store will now be created properly.
         const salt = bcryptjs_1.default.genSaltSync(10);
         const hashedPass = bcryptjs_1.default.hashSync(store.password, salt);
-        console.log("password hashed");
         const newStore = new Store_1.Store();
         const location = {
             type: "Point",
             coordinates: [125.6, 10.1],
         };
-        console.log("point created");
         newStore.store_name = store.storeName;
         newStore.email = store.email;
         newStore.address = store.address;
@@ -61,9 +57,7 @@ const createStore = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         newStore.password = hashedPass;
         newStore.email_verified = false;
         newStore.location = location;
-        console.log("store created");
         yield storeRepository.save(newStore);
-        console.log("store saved");
         // Send back 201 upon successful creation
         res.status(201).json("New store created.");
     }
@@ -168,7 +162,6 @@ const cleanStore = (newStore) => __awaiter(void 0, void 0, void 0, function* () 
         email: "",
         address: "",
     };
-    console.log("cleaning started");
     // Check if a store with this name already exists in the database
     const existingStore = yield storeRepository.findOneBy({
         store_name: newStore.storeName,
@@ -190,9 +183,9 @@ const cleanStore = (newStore) => __awaiter(void 0, void 0, void 0, function* () 
     }
     // TODO: maybe make a better validation for address
     // Check for valid email address
-    if (!validator_1.default.isAlphanumeric(newStore.address)) {
+    if (validator_1.default.isEmpty(newStore.address)) {
         errors.numErrors += 1;
-        errors["address"] = "Please enter a valid address.";
+        errors["address"] = "Please enter an address.";
     }
     // Needs to return either the cleaned user or errors dictionary
     if (errors.numErrors) {

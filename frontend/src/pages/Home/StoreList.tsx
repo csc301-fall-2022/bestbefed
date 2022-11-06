@@ -1,8 +1,11 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import StoreListItem from "./StoreListItem";
 import { Container } from "react-bootstrap";
 import { loremIpsum } from "lorem-ipsum";
+import axios from "../../api/axios";
+import { setSyntheticTrailingComments } from "typescript";
 
+const GET_STORE_URL = "/store/stores";
 export interface Store {
   name: string;
   category: string;
@@ -11,25 +14,30 @@ export interface Store {
 }
 
 function StoreList() {
-  let stores: Array<Store> = [];
-  for (let i = 0; i < 8; i++) {
-    stores.push({
-      name: "Test Store " + (i + 1),
-      category: ["Grocery", "Convenience"][Math.floor(Math.random() * 2)],
-      distance: Math.random() * 10,
-      description: loremIpsum(),
+  const [stores, setStores] = useState([]);
+  const getStores = async () => {
+    const res = await axios.get(GET_STORE_URL, {
+      headers: { "Content-Type": "application/json" },
+      withCredentials: true,
     });
-  }
+    const p = res.data;
+    setStores(p);
+    console.log(res);
+  };
+
+  useEffect(() => {
+    getStores();
+  }, []);
 
   return (
     <Container className="flex-grow-1 store-list px-0">
-      {stores.map(({ name, category, distance, description }) => {
+      {stores.map(({ address, store_name, distance, description }) => {
         return (
           <StoreListItem
-            name={name}
-            category={category}
-            distance={distance}
-            description={description}
+            name={store_name}
+            category={"category"}
+            distance={12}
+            description={address}
           />
         );
       })}
