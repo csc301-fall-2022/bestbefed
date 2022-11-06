@@ -21,7 +21,6 @@ const isAuthenticated = (req, res, next) => {
         return res.send("Unauthorized - request not authenticated.").status(401);
     }
     // Verify that the cookie is valid
-    // <string>process.env.SECRET,
     jsonwebtoken_1.default.verify(token, process.env.SECRET, (err, payload) => {
         if (err) {
             // Ideally this should prompt a redirect to the User login page

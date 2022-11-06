@@ -33,7 +33,7 @@ app.use("/user", user_1.default);
 const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield data_source_1.AppDataSource.initialize();
-        console.log("Conncection to database established...");
+        console.log("Connection to database established...");
     }
     catch (e) {
         console.log(e);

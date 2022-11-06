@@ -35,11 +35,11 @@ const cleanUser = async (newUser: UserRequest) => { // consider implementing try
         email: "",
         paymentInfo: []
     }
-    
     // Check if a user with this username exists in the database
     const existingUser: User | null = await userRepository.findOneBy({
         username: newUser.username,
     });
+    console.log(existingUser);
     if (existingUser) {
         errors.numErrors += 1;
         errors['username'] = "Username already exists! Please choose something else.";
@@ -79,7 +79,7 @@ const cleanUser = async (newUser: UserRequest) => { // consider implementing try
         errors.numErrors += 1;
         errors["paymentInfo"].push("Please enter a valid CVV code for your credit card.");
     }
-
+    console.log(errors);
     // Needs to return either the cleaned user or errors dictionary
     if (errors.numErrors) {
         return errors;
@@ -110,7 +110,7 @@ export const createUser = async (req: Request, res: Response) => {
                 expiryDate: (<any>req.body).paymentInfo.expiryDate,
                 cvv: (<any>req.body).paymentInfo.cvv.trim(),
             }
-        } 
+        }
         const user = await cleanUser(userData);
 
         // Do not proceed with user creation if there are errors with entered data.

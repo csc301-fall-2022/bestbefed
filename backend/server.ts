@@ -25,7 +25,7 @@ app.use("/user", userRouter);
 const connectDB = async() => {
   try {
       await AppDataSource.initialize();
-      console.log("Conncection to database established...");
+      console.log("Connection to database established...");
   } catch (e) {
       console.log(e);
   }

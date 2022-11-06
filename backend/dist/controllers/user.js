@@ -43,9 +43,13 @@ const cleanUser = (newUser) => __awaiter(void 0, void 0, void 0, function* () {
         paymentInfo: []
     };
     // Check if a user with this username exists in the database
+    // console.log();
+    console.log(newUser.username);
+    console.log(userRepository.findOneBy({ username: newUser.username }));
     const existingUser = yield userRepository.findOneBy({
         username: newUser.username,
     });
+    console.log(newUser.username);
     if (existingUser) {
         errors.numErrors += 1;
         errors['username'] = "Username already exists! Please choose something else.";
@@ -81,6 +85,7 @@ const cleanUser = (newUser) => __awaiter(void 0, void 0, void 0, function* () {
         errors.numErrors += 1;
         errors["paymentInfo"].push("Please enter a valid CVV code for your credit card.");
     }
+    console.log(errors);
     // Needs to return either the cleaned user or errors dictionary
     if (errors.numErrors) {
         return errors;
@@ -167,7 +172,6 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const payload = {
             id: user.id
         };
-        // <string>process.env.SECRET
         const token = jsonwebtoken_1.default.sign(payload, process.env.SECRET, { expiresIn: "1d" });
         res.cookie('access_token', token, {
             httpOnly: true,
