@@ -2,14 +2,14 @@
 // import {describe, expect, test} from '@jest/globals';
 // import { UserRequest } from '../controllers/interfaces';
 
-describe('Glizzy hands in my mouth.', function () {
-
-    test('Cum in my mouth daddy.', () => {
+describe('Not implemented yet.', function () {
+    test('Not implemented yet.', () => {
         }); 
+});
     // test('responds to /', () => {
     //     const userInfo: Request = { 
     //         "username": "mattyp123",
-    //         "password": "IHateMyLif3$",
+    //         "password": "LovelyLif3$",
     //         "firstName": "Matty",
     //         "lastName": "P",
     //         "email": "bigmattyp@aol.com",
@@ -40,4 +40,3 @@ describe('Glizzy hands in my mouth.', function () {
 //     //     expect(res.text).toEqual('hello Bob!');
 //     // });
 
-});
