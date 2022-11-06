@@ -26,8 +26,8 @@ app.use("/store", storeRouter);
 // Initializes connection to DB using TypeORM when called.
 const connectDB = async () => {
   try {
-    await AppDataSource.initialize();
-    console.log("Conncection to database established...");
+      await AppDataSource.initialize();
+      console.log("Connection to database established...");
   } catch (e) {
     console.log(e);
   }
