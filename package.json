@@ -4,7 +4,7 @@
   "description": "BestBeFed Web Application (Full Stack)",
   "main": "index.js",
   "scripts": {
-    "build": "cd backend && npm install && npm run build && cd ../frontend && npm install && npm run build",
+    "build": "npm install typescript && cd backend && npm install && npm run build && cd ../frontend && npm install && npm run build",
     "start": "npm run build && cd backend && npm install && npm run start"
   },
   "repository": {
