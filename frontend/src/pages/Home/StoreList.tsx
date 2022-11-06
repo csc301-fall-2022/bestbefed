@@ -38,7 +38,7 @@ function StoreList() {
         return (
           <StoreListItem
             name={storeName}
-            category={Math.random() < 0.5 ? "Grocery" : "Convenience"}
+            category="Grocery"
             distance={distance}
             description={address}
           />
