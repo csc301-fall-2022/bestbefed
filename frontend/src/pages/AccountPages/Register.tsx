@@ -10,13 +10,11 @@ import axios from "../../api/axios";
 import "./styles.css";
 import { Link } from "react-router-dom";
 import { useIsAuthenticated } from "react-auth-kit";
-
+import isEmail from "validator/lib/isEmail";
 const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
 const FN_REGEX = /^[A-z][A-z ]{0,23}$/;
 const LN_REGEX = /^[A-z][A-z ]{0,23}$/;
-const EMAIL_REGEX =
-  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
 const visaRegEx = /^(?:4[0-9]{12}(?:[0-9]{3})?)$/;
 const mastercardRegEx = /^(?:5[1-5][0-9]{14})$/;
 const amexpRegEx = /^(?:3[47][0-9]{13})$/;
@@ -120,7 +118,7 @@ function Register() {
   }, [lastname]);
 
   useEffect(() => {
-    const result = EMAIL_REGEX.test(email);
+    const result = isEmail(email);
     setValidEmail(result);
   }, [email]);
 
@@ -150,7 +148,7 @@ function Register() {
     // button hacking check
     const v1 = USER_REGEX.test(username);
     const v2 = PWD_REGEX.test(password);
-    const v3 = EMAIL_REGEX.test(email);
+    const v3 = isEmail(email);
     const v4 = FN_REGEX.test(firstname);
     const v5 = LN_REGEX.test(lastname);
 
