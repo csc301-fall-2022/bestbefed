@@ -4,25 +4,19 @@ import {
   Column,
   BeforeInsert,
   BaseEntity,
+  Index,
 } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
-
-import { PaymentInfo } from "../controllers/interfaces";
+import { Geometry, Point } from "geojson";
 
 @Entity()
-export class User extends BaseEntity {
+export class Store extends BaseEntity {
   // Using uuid instead - 16 bit randomly generated id that is hidden and can't be easily guessed
   @PrimaryColumn("uuid")
-  user_id!: string;
+  store_id!: string;
 
   @Column("varchar", { length: 255 })
-  username!: string;
-
-  @Column("varchar", { length: 255 })
-  firstName!: string;
-
-  @Column("varchar", { length: 255 })
-  lastName!: string;
+  store_name!: string;
 
   @Column("varchar", { length: 255 })
   email!: string;
@@ -34,13 +28,21 @@ export class User extends BaseEntity {
   email_verified!: boolean;
 
   @Column("date")
-  create_date!: Date; // string<Date>
+  create_date!: Date;
 
-  @Column("simple-json")
-  payment_info!: PaymentInfo;
+  @Index({ spatial: true })
+  @Column({
+    type: "geography",
+    spatialFeatureType: "Point",
+    srid: 4326,
+  })
+  location!: Point;
+
+  @Column("text")
+  address!: string;
 
   @BeforeInsert()
   generateId() {
-    this.user_id = uuidv4();
+    this.store_id = uuidv4();
   }
 }

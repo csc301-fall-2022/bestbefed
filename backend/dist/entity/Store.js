@@ -9,57 +9,58 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.User = void 0;
+exports.Store = void 0;
 const typeorm_1 = require("typeorm");
 const uuid_1 = require("uuid");
-let User = class User extends typeorm_1.BaseEntity {
+let Store = class Store extends typeorm_1.BaseEntity {
     generateId() {
-        this.user_id = (0, uuid_1.v4)();
+        this.store_id = (0, uuid_1.v4)();
     }
 };
 __decorate([
     (0, typeorm_1.PrimaryColumn)("uuid"),
     __metadata("design:type", String)
-], User.prototype, "user_id", void 0);
+], Store.prototype, "store_id", void 0);
 __decorate([
     (0, typeorm_1.Column)("varchar", { length: 255 }),
     __metadata("design:type", String)
-], User.prototype, "username", void 0);
+], Store.prototype, "store_name", void 0);
 __decorate([
     (0, typeorm_1.Column)("varchar", { length: 255 }),
     __metadata("design:type", String)
-], User.prototype, "firstName", void 0);
-__decorate([
-    (0, typeorm_1.Column)("varchar", { length: 255 }),
-    __metadata("design:type", String)
-], User.prototype, "lastName", void 0);
-__decorate([
-    (0, typeorm_1.Column)("varchar", { length: 255 }),
-    __metadata("design:type", String)
-], User.prototype, "email", void 0);
+], Store.prototype, "email", void 0);
 __decorate([
     (0, typeorm_1.Column)("text"),
     __metadata("design:type", String)
-], User.prototype, "password", void 0);
+], Store.prototype, "password", void 0);
 __decorate([
     (0, typeorm_1.Column)("boolean"),
     __metadata("design:type", Boolean)
-], User.prototype, "email_verified", void 0);
+], Store.prototype, "email_verified", void 0);
 __decorate([
     (0, typeorm_1.Column)("date"),
     __metadata("design:type", Date)
-], User.prototype, "create_date", void 0);
+], Store.prototype, "create_date", void 0);
 __decorate([
-    (0, typeorm_1.Column)("simple-json"),
+    (0, typeorm_1.Index)({ spatial: true }),
+    (0, typeorm_1.Column)({
+        type: "geography",
+        spatialFeatureType: "Point",
+        srid: 4326,
+    }),
     __metadata("design:type", Object)
-], User.prototype, "payment_info", void 0);
+], Store.prototype, "location", void 0);
+__decorate([
+    (0, typeorm_1.Column)("text"),
+    __metadata("design:type", String)
+], Store.prototype, "address", void 0);
 __decorate([
     (0, typeorm_1.BeforeInsert)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
-], User.prototype, "generateId", null);
-User = __decorate([
+], Store.prototype, "generateId", null);
+Store = __decorate([
     (0, typeorm_1.Entity)()
-], User);
-exports.User = User;
+], Store);
+exports.Store = Store;
