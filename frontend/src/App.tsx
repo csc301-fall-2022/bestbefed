@@ -1,12 +1,8 @@
-import { Route, Routes } from "react-router-dom";
-import { AuthProvider } from "react-auth-kit";
-import { BrowserRouter } from "react-router-dom";
-import { RequireAuth } from "react-auth-kit";
+import { Route, Routes, BrowserRouter, Navigate } from "react-router-dom";
+import { AuthProvider, RequireAuth } from "react-auth-kit";
 
-import Login from "./pages/Login/Login";
-import Register from "./pages/Register/Register";
+import { Login, Logout, Register } from "./pages/AccountPages";
 import Home from "./pages/Home/Home";
-import Logout from "./pages/Logout";
 
 function App() {
   return (
@@ -18,9 +14,6 @@ function App() {
     >
       <BrowserRouter>
         <Routes>
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/logout" element={<Logout />} />
           <Route
             path="/"
             element={
@@ -29,6 +22,10 @@ function App() {
               </RequireAuth>
             }
           />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/logout" element={<Logout />} />
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
