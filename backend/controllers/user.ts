@@ -70,22 +70,28 @@ const cleanUser = async (newUser: UserRequest) => {
     errors["lastName"] = "Please enter your last name.";
   }
 
-  // Check that every piece of the payment info is valid
-  if (!validator.isCreditCard(newUser.paymentInfo.creditCard)) {
-    errors.numErrors += 1;
-    errors["paymentInfo"].push("Please enter a valid credit card number!");
-  }
-  //   if (!validator.isDate(newUser.paymentInfo.expiryDate)) {
-  //     errors["paymentInfo"].push("Please enter a valid card expiry date!");
-  //   }
+  // Check that every piece of the payment info is valid (if provided)
   if (
-    newUser.paymentInfo.cvv.length != 3 ||
-    !validator.isNumeric(newUser.paymentInfo.cvv)
+    newUser.paymentInfo.creditCard ||
+    newUser.paymentInfo.cvv ||
+    newUser.paymentInfo.expiryDate
   ) {
-    errors.numErrors += 1;
-    errors["paymentInfo"].push(
-      "Please enter a valid CVV code for your credit card."
-    );
+    if (!validator.isCreditCard(newUser.paymentInfo.creditCard)) {
+      errors.numErrors += 1;
+      errors["paymentInfo"].push("Please enter a valid credit card number!");
+    }
+    //   if (!validator.isDate(newUser.paymentInfo.expiryDate)) {
+    //     errors["paymentInfo"].push("Please enter a valid card expiry date!");
+    //   }
+    if (
+      newUser.paymentInfo.cvv.length != 3 ||
+      !validator.isNumeric(newUser.paymentInfo.cvv)
+    ) {
+      errors.numErrors += 1;
+      errors["paymentInfo"].push(
+        "Please enter a valid CVV code for your credit card."
+      );
+    }
   }
 
   // Needs to return either the cleaned user or errors dictionary
@@ -181,17 +187,21 @@ export const loginUser = async (req: Request, res: Response) => {
     const payload = {
       id: user.user_id,
     };
-    const token = jwt.sign(payload, <string>process.env.SECRET, {
-      expiresIn: "1d",
-    });
-    res
-      .cookie("access_token", token, {
-        httpOnly: false,
-      })
-      .status(200)
-      .json({
+    const token = jwt.sign(
+      payload,
+      <string>(process.env.PRODUCTION ? process.env.SECRET : "hellomyfriend"),
+      {
+        expiresIn: "1d",
+      }
+    );
+    res.status(200).json({
+      token: token,
+      expiresIn: "1440",
+      authUserState: {
         username: user.username,
-      });
+        email: user.email,
+      },
+    });
   } catch (err) {
     res.status(500).send(err);
   }

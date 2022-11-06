@@ -22,19 +22,23 @@ export const isAuthenticated = (
   }
 
   // Verify that the cookie is valid
-  jwt.verify(token, <string>process.env.SECRET, (err: any, payload: any) => {
-    if (err) {
-      // Ideally this should prompt a redirect to the User login page
-      return res
-        .json("Session token is invalid. Please login again.")
-        .status(403);
+  jwt.verify(
+    token,
+    <string>(process.env.PRODUCTION ? process.env.SECRET : "hellomyfriend"),
+    (err: any, payload: any) => {
+      if (err) {
+        // Ideally this should prompt a redirect to the User login page
+        return res
+          .json("Session token is invalid. Please login again.")
+          .status(403);
+      }
+
+      // Successful JWT Verify decodes the payload, i.e., we will have access to the user's uuid
+      (<any>req).user = {
+        id: <string>payload.id,
+      };
+
+      next();
     }
-
-    // Successful JWT Verify decodes the payload, i.e., we will have access to the user's uuid
-    (<any>req).user = {
-      id: <string>payload.id,
-    };
-
-    next();
-  });
+  );
 };

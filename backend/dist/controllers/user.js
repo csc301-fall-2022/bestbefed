@@ -72,18 +72,22 @@ const cleanUser = (newUser) => __awaiter(void 0, void 0, void 0, function* () {
         errors.numErrors += 1;
         errors["lastName"] = "Please enter your last name.";
     }
-    // Check that every piece of the payment info is valid
-    if (!validator_1.default.isCreditCard(newUser.paymentInfo.creditCard)) {
-        errors.numErrors += 1;
-        errors["paymentInfo"].push("Please enter a valid credit card number!");
-    }
-    //   if (!validator.isDate(newUser.paymentInfo.expiryDate)) {
-    //     errors["paymentInfo"].push("Please enter a valid card expiry date!");
-    //   }
-    if (newUser.paymentInfo.cvv.length != 3 ||
-        !validator_1.default.isNumeric(newUser.paymentInfo.cvv)) {
-        errors.numErrors += 1;
-        errors["paymentInfo"].push("Please enter a valid CVV code for your credit card.");
+    // Check that every piece of the payment info is valid (if provided)
+    if (newUser.paymentInfo.creditCard ||
+        newUser.paymentInfo.cvv ||
+        newUser.paymentInfo.expiryDate) {
+        if (!validator_1.default.isCreditCard(newUser.paymentInfo.creditCard)) {
+            errors.numErrors += 1;
+            errors["paymentInfo"].push("Please enter a valid credit card number!");
+        }
+        //   if (!validator.isDate(newUser.paymentInfo.expiryDate)) {
+        //     errors["paymentInfo"].push("Please enter a valid card expiry date!");
+        //   }
+        if (newUser.paymentInfo.cvv.length != 3 ||
+            !validator_1.default.isNumeric(newUser.paymentInfo.cvv)) {
+            errors.numErrors += 1;
+            errors["paymentInfo"].push("Please enter a valid CVV code for your credit card.");
+        }
     }
     // Needs to return either the cleaned user or errors dictionary
     if (errors.numErrors) {
@@ -169,16 +173,16 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const payload = {
             id: user.user_id,
         };
-        const token = jsonwebtoken_1.default.sign(payload, process.env.SECRET, {
+        const token = jsonwebtoken_1.default.sign(payload, (process.env.PRODUCTION ? process.env.SECRET : "hellomyfriend"), {
             expiresIn: "1d",
         });
-        res
-            .cookie("access_token", token, {
-            httpOnly: false,
-        })
-            .status(200)
-            .json({
-            username: user.username,
+        res.status(200).json({
+            token: token,
+            expiresIn: "1440",
+            authUserState: {
+                username: user.username,
+                email: user.email,
+            },
         });
     }
     catch (err) {

@@ -116,9 +116,13 @@ export const loginStore = async (req: Request, res: Response) => {
     const payload = {
       id: store.store_id,
     };
-    const token = jwt.sign(payload, <string>process.env.SECRET, {
-      expiresIn: "1d",
-    });
+    const token = jwt.sign(
+      payload,
+      <string>(process.env.PRODUCTION ? process.env.SECRET : "hellomyfriend"),
+      {
+        expiresIn: "1d",
+      }
+    );
     res
       .cookie("access_token", token, {
         httpOnly: false,

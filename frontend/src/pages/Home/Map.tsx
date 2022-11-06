@@ -45,25 +45,26 @@ function Map() {
       top: 0,
       bottom: 0,
     });
-
-    fetch(
-      "https://api.mapbox.com/datasets/v1/1izardo/cla31ywhh0u9z20s0473wmllm/features?access_token=pk.eyJ1IjoiMWl6YXJkbyIsImEiOiJjbDhua2RkMmIwdHlxM29veWJpY2RjMDc5In0.IRH-PqrKFzsYsPjb2SAVEQ"
-    )
-      .then((response) => response.json())
-      .then((data) => {
-        map.current?.addLayer({
-          id: "stores",
-          type: "circle",
-          paint: {
-            "circle-color": "limegreen",
-            "circle-radius": 10,
-          },
-          source: {
-            type: "geojson",
-            data: data,
-          },
+    map.current.on("styledata", () => {
+      fetch(
+        "https://api.mapbox.com/datasets/v1/1izardo/cla31ywhh0u9z20s0473wmllm/features?access_token=pk.eyJ1IjoiMWl6YXJkbyIsImEiOiJjbDhua2RkMmIwdHlxM29veWJpY2RjMDc5In0.IRH-PqrKFzsYsPjb2SAVEQ"
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          map.current?.addLayer({
+            id: "stores",
+            type: "circle",
+            paint: {
+              "circle-color": "limegreen",
+              "circle-radius": 10,
+            },
+            source: {
+              type: "geojson",
+              data: data,
+            },
+          });
         });
-      });
+    });
   });
 
   // Update map center any time lng/lat changes

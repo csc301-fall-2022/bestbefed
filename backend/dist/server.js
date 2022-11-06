@@ -24,30 +24,36 @@ const data_source_1 = require("./data-source");
 const auth_1 = require("./controllers/auth");
 const app = (0, express_1.default)();
 const port = process.env.PORT || 8000;
-app.use(express_1.default.static(path_1.default.join(__dirname, "../../frontend/build")));
+const cors = require("cors");
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 // Middleware via External Libraries.
 app.use((0, cookie_parser_1.default)());
 app.use(express_1.default.json());
-// Routing middleware.
+// Example of Auth middleware - the second argument is our auth function that verifies user is logged in before proceeding
+app.get("/api", auth_1.isAuthenticated, (req, res) => {
+    res.send("<h1>Hello from API endpoint!<h1>");
+});
+// User routing middleware.
 app.use("/user", user_1.default);
+// Store routing middleware.
 app.use("/store", store_1.default);
+// All other routes are directed to the React app
+app.use(express_1.default.static(path_1.default.join(__dirname, "../../frontend/build/")));
+app.get("*", (req, res) => {
+    res.sendFile(path_1.default.join(__dirname, "../../frontend/build/"));
+});
 // Initializes connection to DB using TypeORM when called.
 const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield data_source_1.AppDataSource.initialize();
-        console.log("Connection to database established...");
+        let host = process.env.PRODUCTION
+            ? "bestbefed-data.czbbb7d5g36e.us-east-2.rds.amazonaws.com"
+            : "localhost";
+        console.log(`⚡️[server]: Connection to database established (${host})`);
     }
     catch (e) {
         console.log(e);
     }
-});
-// Serving up the landing page - Change this to daniel's landing page
-app.get("/", (req, res) => {
-    res.sendFile(path_1.default.join(__dirname, "../../frontend/build", "index.html"));
-});
-// Example of Auth middleware - the second argument is our auth function that verifies user is logged in before proceeding
-app.get("/api", auth_1.isAuthenticated, (req, res) => {
-    res.send("<h1>Hello from API endpoint!<h1>");
 });
 app.listen(port, () => {
     connectDB();
