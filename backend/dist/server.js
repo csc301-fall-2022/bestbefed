@@ -46,7 +46,10 @@ app.get("*", (req, res) => {
 const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield data_source_1.AppDataSource.initialize();
-        console.log("Conncection to database established...");
+        let host = process.env.PRODUCTION
+            ? "bestbefed-data.czbbb7d5g36e.us-east-2.rds.amazonaws.com"
+            : "localhost";
+        console.log(`⚡️[server]: Connection to database established (${host})`);
     }
     catch (e) {
         console.log(e);

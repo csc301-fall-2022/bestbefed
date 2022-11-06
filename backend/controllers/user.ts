@@ -187,9 +187,13 @@ export const loginUser = async (req: Request, res: Response) => {
     const payload = {
       id: user.user_id,
     };
-    const token = jwt.sign(payload, <string>process.env.SECRET, {
-      expiresIn: "1d",
-    });
+    const token = jwt.sign(
+      payload,
+      <string>(process.env.PRODUCTION ? process.env.SECRET : "hellomyfriend"),
+      {
+        expiresIn: "1d",
+      }
+    );
     res.status(200).json({
       token: token,
       expiresIn: "1440",
