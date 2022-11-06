@@ -19,6 +19,7 @@ require("dotenv/config");
 require("reflect-metadata");
 // Local imports
 const user_1 = __importDefault(require("./routes/user"));
+const store_1 = __importDefault(require("./routes/store"));
 const data_source_1 = require("./data-source");
 const auth_1 = require("./controllers/auth");
 const app = (0, express_1.default)();
@@ -34,6 +35,8 @@ app.get("/api", auth_1.isAuthenticated, (req, res) => {
 });
 // User routing middleware.
 app.use("/user", user_1.default);
+// Store routing middleware.
+app.use("/store", store_1.default);
 // All other routes are directed to the React app
 app.use(express_1.default.static(path_1.default.join(__dirname, "../../frontend/build/")));
 app.get("*", (req, res) => {

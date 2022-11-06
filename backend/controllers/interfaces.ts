@@ -23,3 +23,18 @@ export interface UserErrors {
   email: string;
   paymentInfo: string[];
 }
+
+export interface StoreRequest {
+  storeName: string;
+  password: string;
+  address: string;
+  email: string;
+}
+
+export interface StoreErrors {
+  numErrors: number;
+  storeName: string;
+  password: string;
+  address: string;
+  email: string;
+}
