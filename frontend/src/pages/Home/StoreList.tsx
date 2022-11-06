@@ -26,7 +26,6 @@ function StoreList() {
       }
     );
     setStores(data);
-    console.log(data[0]["store_name"]);
   };
 
   useEffect(() => {
