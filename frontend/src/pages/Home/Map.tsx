@@ -45,7 +45,7 @@ function Map() {
       top: 0,
       bottom: 0,
     });
-    map.current.on("styledata", () => {
+    map.current.on("load", () => {
       fetch(
         "https://api.mapbox.com/datasets/v1/1izardo/cla31ywhh0u9z20s0473wmllm/features?access_token=pk.eyJ1IjoiMWl6YXJkbyIsImEiOiJjbDhua2RkMmIwdHlxM29veWJpY2RjMDc5In0.IRH-PqrKFzsYsPjb2SAVEQ"
       )
