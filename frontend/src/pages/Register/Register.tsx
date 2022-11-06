@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "../../api/axios";
 import "./Register.css";
 import { Link } from "react-router-dom";
+import { useIsAuthenticated } from "react-auth-kit";
 
 const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
@@ -86,6 +87,8 @@ function Register() {
 
   // For redirection after a successful login
   const navigate = useNavigate();
+  const isAuthenticated = useIsAuthenticated();
+
   useEffect(() => {
     if (success) {
       navigate("/login");
@@ -97,16 +100,16 @@ function Register() {
   }, []);
 
   useEffect(() => {
+    if (isAuthenticated()) navigate("/");
+  });
+
+  useEffect(() => {
     const result = USER_REGEX.test(username);
-    console.log(result);
-    console.log(username);
     setValidUsername(result);
   }, [username]);
 
   useEffect(() => {
     const result = PWD_REGEX.test(password);
-    console.log(result);
-    console.log(password);
     setValidPassword(result);
     const matching = password === mpassword;
     setValidMPassword(matching);
@@ -114,43 +117,31 @@ function Register() {
 
   useEffect(() => {
     const result = FN_REGEX.test(firstname);
-    console.log(firstname);
-    console.log(result);
     setValidFirstname(result);
   }, [firstname]);
 
   useEffect(() => {
     const result = LN_REGEX.test(lastname);
-    console.log(lastname);
-    console.log(result);
     setValidLastname(result);
   }, [lastname]);
 
   useEffect(() => {
     const result = EMAIL_REGEX.test(email);
-    console.log(email);
-    console.log(result);
     setValidEmail(result);
   }, [email]);
 
   useEffect(() => {
     const result = ValidateCreditCardNumber(creditcard);
-    console.log(creditcard);
-    console.log(result);
     setValidCc(result);
   }, [creditcard]);
 
   useEffect(() => {
     const result = expREGEX.test(exp);
-    console.log(exp);
-    console.log(result);
     setValidExp(result);
   }, [exp]);
 
   useEffect(() => {
     const result = cvvREGEX.test(cvv);
-    console.log(cvv);
-    console.log(result);
     setValidCvv(result);
   }, [cvv]);
 
@@ -196,7 +187,6 @@ function Register() {
         }
       );
 
-      console.log(JSON.stringify(response));
       setSuccess(true);
       // clear input fields here if we want
     } catch (err: any) {

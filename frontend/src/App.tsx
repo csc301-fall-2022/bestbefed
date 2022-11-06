@@ -1,13 +1,14 @@
 import { Route, Routes } from "react-router-dom";
 import { AuthProvider } from "react-auth-kit";
 import { BrowserRouter } from "react-router-dom";
+import { RequireAuth } from "react-auth-kit";
 
 import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
 import Home from "./pages/Home/Home";
+import Logout from "./pages/Logout";
 
 function App() {
-  // Need to make <Home /> index and <Register /> have a path of path="/register"
   return (
     <AuthProvider
       authType={"cookie"}
@@ -19,7 +20,15 @@ function App() {
         <Routes>
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Home />} />
+          <Route path="/logout" element={<Logout />} />
+          <Route
+            path="/"
+            element={
+              <RequireAuth loginPath="/login">
+                <Home />
+              </RequireAuth>
+            }
+          />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
