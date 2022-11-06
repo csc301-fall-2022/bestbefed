@@ -5,6 +5,12 @@ const Filters = ({ filterItem, setItems, storeItems }) => {
   return (
     <>
       <div className="d-flex justify-content-center">
+        <button
+          className="btn-dark text-white p-1 px-3 mx-5 fw-bold btn"
+          onClick={() => setItems(Data)}
+        >
+          All
+        </button>
         {storeItems.map((Val, id) => {
           return (
             <button
@@ -16,12 +22,6 @@ const Filters = ({ filterItem, setItems, storeItems }) => {
             </button>
           );
         })}
-        <button
-          className="btn-dark text-white p-1 px-3 mx-5 fw-bold btn"
-          onClick={() => setItems(Data)}
-        >
-          All
-        </button>
       </div>
     </>
   );
