@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "cd backend && npm install && npm run build && cd ../frontend && npm install && npm run build",
-    "start": "cd backend && npm install && npm run start"
+    "start": "cd backend && npm run start"
   },
   "repository": {
     "type": "git",
@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/csc301-fall-2022/team-project-20-grocery-store-waste-app-m/issues"
   },
-  "homepage": "https://bestbefed.ca"
+  "homepage": "https://bestbefed.ca",
+  "dependencies": {
+    "typescript": "^4.8.4"
+  }
 }
