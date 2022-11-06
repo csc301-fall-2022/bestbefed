@@ -17,9 +17,7 @@
     "url": "https://github.com/csc301-fall-2022/team-project-20-grocery-store-waste-app-m/issues"
   },
   "homepage": "https://bestbefed.ca",
-  "devDependencies": {
-    "@types/jest": "^29.2.2",
-    "jest": "^29.2.2",
-    "supertest": "^6.3.1"
+  "dependencies": {
+    "typescript": "^4.8.4"
   }
 }
