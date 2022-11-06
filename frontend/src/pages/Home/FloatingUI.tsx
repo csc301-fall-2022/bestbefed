@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Container, Col, Row, Button } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBars,
@@ -11,6 +12,7 @@ import StoreList from "./StoreList";
 
 function FloatingUI() {
   const [showMenu, setShowMenu] = useState(false);
+  const navigate = useNavigate();
 
   const handleShowMenu = () => {
     setShowMenu(true);
@@ -57,9 +59,7 @@ function FloatingUI() {
             variant="dark"
             size="lg"
             className="rounded-circle pe-auto shadow"
-            onClick={() => {
-              /* TODO: Implement route change */
-            }}
+            onClick={() => navigate("/cart")}
           >
             <FontAwesomeIcon icon={faShoppingCart} />
           </Button>
