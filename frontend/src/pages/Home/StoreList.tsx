@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
 import StoreListItem from "./StoreListItem";
 import { Container } from "react-bootstrap";
-import { loremIpsum } from "lorem-ipsum";
 import axios from "../../api/axios";
-import { setSyntheticTrailingComments } from "typescript";
 
 const GET_STORE_URL = "/store/stores";
 export interface Store {
@@ -22,7 +20,6 @@ function StoreList() {
     });
     const p = res.data;
     setStores(p);
-    console.log(res);
   };
 
   useEffect(() => {
