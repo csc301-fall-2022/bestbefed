@@ -12,12 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logoutStore = exports.loginStore = exports.getStores = exports.createStore = void 0;
+exports.logoutStore = exports.loginStore = exports.fetchStores = exports.createStore = void 0;
 const validator_1 = __importDefault(require("validator"));
 const data_source_1 = require("../data-source");
 const Store_1 = require("../entity/Store");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const distance_1 = __importDefault(require("@turf/distance"));
 // Create a store repository that allows us to use TypeORM to interact w/ Store entity in DB.
 const storeRepository = data_source_1.AppDataSource.getRepository(Store_1.Store);
 /**
@@ -74,17 +75,26 @@ exports.createStore = createStore;
  *
  * @return {null}          Simply sends response back to client to notify of success or failure.
  */
-const getStores = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const fetchStores = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const user_location = req.body.location;
         // get the stores from database
         const stores = yield storeRepository.find();
-        res.status(200).json(stores);
+        console.log(stores);
+        const storeInfo = stores.map((store) => {
+            return {
+                storeName: store.store_name,
+                address: store.address,
+                distance: (0, distance_1.default)(user_location, store.location.coordinates),
+            };
+        });
+        res.status(200).json(storeInfo);
     }
     catch (err) {
         res.status(500).send(err);
     }
 });
-exports.getStores = getStores;
+exports.fetchStores = fetchStores;
 /**
  * Handles POST store/login and attempts to log in and authenticate a store.
  *

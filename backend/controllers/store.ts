@@ -1,11 +1,12 @@
 import { Request, Response } from "express";
 import validator from "validator";
 import { AppDataSource } from "../data-source";
-import { StoreErrors, StoreRequest } from "./interfaces";
+import { StoreErrors, StoreRequest, StoreInfo } from "./interfaces";
 import { Store } from "../entity/Store";
 import bcrypt from "bcryptjs";
 import { Point } from "geojson";
 import jwt from "jsonwebtoken";
+import distance from "@turf/distance";
 
 // Create a store repository that allows us to use TypeORM to interact w/ Store entity in DB.
 const storeRepository = AppDataSource.getRepository(Store);
@@ -68,12 +69,19 @@ export const createStore = async (req: Request, res: Response) => {
  *
  * @return {null}          Simply sends response back to client to notify of success or failure.
  */
-export const getStores = async (req: Request, res: Response) => {
+export const fetchStores = async (req: Request, res: Response) => {
   try {
+    const user_location: number[] = (<any>req.body).location;
     // get the stores from database
     const stores: Store[] | null = await storeRepository.find();
-
-    res.status(200).json(stores);
+    const storeInfo: StoreInfo[] = stores.map((store) => {
+      return <StoreInfo>{
+        storeName: store.store_name,
+        address: store.address,
+        distance: distance(user_location, store.location.coordinates),
+      };
+    });
+    res.status(200).json(storeInfo);
   } catch (err) {
     res.status(500).send(err);
   }

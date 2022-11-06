@@ -3,7 +3,7 @@ import StoreListItem from "./StoreListItem";
 import { Container } from "react-bootstrap";
 import axios from "../../api/axios";
 
-const GET_STORE_URL = "/store/stores";
+const POST_STORE_URL = "/store/stores";
 export interface Store {
   name: string;
   category: string;
@@ -14,12 +14,18 @@ export interface Store {
 function StoreList() {
   const [stores, setStores] = useState([]);
   const getStores = async () => {
-    const res = await axios.get(GET_STORE_URL, {
-      headers: { "Content-Type": "application/json" },
-      withCredentials: true,
-    });
-    const p = res.data;
-    setStores(p);
+    const user_loc = {
+      location: [12, 13],
+    };
+    const { data } = await axios.post(
+      POST_STORE_URL,
+      JSON.stringify(user_loc),
+      {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      }
+    );
+    setStores(data);
   };
 
   useEffect(() => {
@@ -32,8 +38,8 @@ function StoreList() {
         return (
           <StoreListItem
             name={store_name}
-            category={"category"}
-            distance={12}
+            category={Math.random() < 0.5 ? "Grocery" : "Convenience"}
+            distance={distance}
             description={address}
           />
         );

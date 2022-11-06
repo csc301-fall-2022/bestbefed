@@ -1,10 +1,9 @@
 import express, { Request, Response } from "express";
-import path from "path";
 import {
   createStore,
   loginStore,
   logoutStore,
-  getStores,
+  fetchStores,
 } from "../controllers/store";
 
 const router = express.Router();
@@ -14,6 +13,6 @@ router.post("/", createStore);
 
 router.post("/login", loginStore);
 router.get("/logout", logoutStore);
-router.get("/stores", getStores);
+router.post("/stores", fetchStores);
 
 export default router;

@@ -31,6 +31,12 @@ export interface StoreRequest {
   email: string;
 }
 
+export interface StoreInfo {
+  storeName: string;
+  distance: number;
+  address: string;
+}
+
 export interface StoreErrors {
   numErrors: number;
   storeName: string;
