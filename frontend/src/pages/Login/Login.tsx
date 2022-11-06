@@ -7,8 +7,8 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSignIn } from "react-auth-kit";
 import "./Login.css";
-import axios from "../api/axios";
-import { Link } from "react-router-dom";
+import axios from "../../api/axios";
+import { Link, useNavigate } from "react-router-dom";
 
 const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
@@ -18,6 +18,7 @@ function Login() {
   const userRef = useRef<null | HTMLInputElement>(null);
   const errRef = useRef(null);
   const signIn = useSignIn();
+  const navigate = useNavigate();
 
   const [username, setUsername] = useState("");
   const [validUsername, setValidUsername] = useState(false);
@@ -77,32 +78,32 @@ function Login() {
       );
       console.log(response);
       // on successful request
-      // const s: Boolean = signIn({
-      //   token: response.data.token,
-      //   expiresIn: response.data.expiresIn,
-      //   tokenType: "Bearer",
-      //   authState: response.data.authUserState,
-      // });
-      // console.log("Sign in was: " + s);
-      // if (!s) {
-      //   // sign in failed
-      //   return;
-      // }
+      const s: Boolean = signIn({
+        token: response.data.token,
+        expiresIn: response.data.expiresIn,
+        tokenType: "Bearer",
+        authState: response.data.authUserState,
+      });
+      console.log("Sign in was: " + s);
+      if (!s) {
+        // sign in failed
+        return;
+      }
 
-      // setSuccess(true);
-      // setPassword("");
-      // setUsername("");
+      setSuccess(true);
+      setPassword("");
+      setUsername("");
       console.log(username, password);
     } catch (err: any) {
-      // if (!err?.response) {
-      //   setErrorMessage("No Server Response, possible maintanance at work");
-      // } else if (err.response?.status == 404) {
-      //   setErrorMessage("Username does not exist");
-      // } else if (err.response?.status == 400) {
-      //   setErrorMessage("Password is invalid");
-      // } else {
-      //   setErrorMessage("Login Failed");
-      // }
+      if (!err?.response) {
+        setErrorMessage("No Server Response, possible maintanance at work");
+      } else if (err.response?.status === 404) {
+        setErrorMessage("Username does not exist");
+      } else if (err.response?.status === 400) {
+        setErrorMessage("Password is invalid");
+      } else {
+        setErrorMessage("Login Failed");
+      }
       console.log("err");
     }
   };
@@ -110,13 +111,7 @@ function Login() {
   return (
     <>
       {success ? (
-        // go to home page here in future
-        <section>
-          <h1>Success!</h1>
-          <p>
-            <a href="#">Home Page</a>
-          </p>
-        </section>
+        navigate("/home")
       ) : (
         <section>
           <p ref={errRef} className={errormessage ? "errmsg" : "offscreen"}>

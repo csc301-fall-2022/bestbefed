@@ -6,7 +6,7 @@ import {
   faInfoCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import axios from "../api/axios";
+import axios from "../../api/axios";
 import "./Register.css";
 import { Link } from "react-router-dom";
 
@@ -90,7 +90,7 @@ function Register() {
     if (success) {
       navigate("/login");
     }
-  }, [success]);
+  }, [success, navigate]);
 
   useEffect(() => {
     userRef.current?.focus();
@@ -218,7 +218,7 @@ function Register() {
         <section>
           <h1>Success!</h1>
           <p>
-            <a href="#">Sign In</a>
+            <Link to="/login">Sign in</Link>
           </p>
         </section>
       ) : (
@@ -517,10 +517,7 @@ function Register() {
                 !validMPassword ||
                 !validLastname ||
                 !validFirstname ||
-                !validExp ||
-                !validEmail ||
-                !validCvv ||
-                !validCc
+                !validEmail
                   ? true
                   : false
               }

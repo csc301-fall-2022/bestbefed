@@ -1,39 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Nunito&display=swap");
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html {
-  font-family: "Nunito", sans-serif;
-  font-size: 22px;
-  color: #fff;
-}
-
-body {
-  min-height: 100vh;
-  background-color: wheat;
-}
-
-#root {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: 2em;
-}
-
-.App {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  padding: 1rem 0.5rem;
-}
-
 section {
   width: 100%;
   max-width: 420px;
@@ -60,7 +26,6 @@ a:visited {
 
 input[type="text"],
 input[type="password"],
-input[type="email"],
 button,
 textarea {
   font-family: "Nunito", sans-serif;
