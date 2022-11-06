@@ -409,7 +409,7 @@ function Register() {
                 "someone@example.com"
               </p>
               <label htmlFor="creditcard">
-                Credit Card #:
+                Credit Card #: <i>(optional)</i>
                 <FontAwesomeIcon
                   icon={faCarrot}
                   className={validCc ? "valid" : "hide"}
@@ -438,7 +438,7 @@ function Register() {
                 Invalid Credit Card Number.
               </p>
               <label htmlFor="exp">
-                Expiry Date:
+                Expiry Date: <i>(optional)</i>
                 <FontAwesomeIcon
                   icon={faCarrot}
                   className={validExp ? "valid" : "hide"}
@@ -467,7 +467,7 @@ function Register() {
                 Invalid Date. Example: "01/25"
               </p>
               <label htmlFor="cvv">
-                cvv:
+                CVV: <i>(optional)</i>
                 <FontAwesomeIcon
                   icon={faCarrot}
                   className={validCvv ? "valid" : "hide"}
@@ -493,7 +493,7 @@ function Register() {
                 }
               >
                 <FontAwesomeIcon icon={faInfoCircle} />
-                Invalid cvv number.
+                Invalid CVV number.
               </p>
               <button
                 disabled={
