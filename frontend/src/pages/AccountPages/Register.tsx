@@ -277,7 +277,7 @@ function Register() {
                 8 - 24 characters
                 <br />
                 Includes an uppercase and lowercase letter,
-                <br />a letter and a number.
+                <br />a symbol and a number.
               </p>
               <label htmlFor="mpassword">
                 Confirm Password:
