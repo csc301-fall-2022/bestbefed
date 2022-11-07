@@ -7,6 +7,7 @@ import {
   faCog,
   faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
+import { Link } from "react-router-dom";
 
 function MenuSlideIn({
   showMenu,
@@ -31,7 +32,10 @@ function MenuSlideIn({
           <FontAwesomeIcon icon={faCog} size="lg" /> Settings
         </p>
         <p>
-          <FontAwesomeIcon icon={faRightFromBracket} size="lg" /> Log out
+          <FontAwesomeIcon icon={faRightFromBracket} size="lg" />{" "}
+          <Link to="/logout" className="text-dark">
+            Log out
+          </Link>
         </p>
       </Offcanvas.Body>
     </Offcanvas>

@@ -12,12 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logoutStore = exports.loginStore = exports.getStores = exports.createStore = void 0;
+exports.logoutStore = exports.loginStore = exports.fetchStores = exports.createStore = void 0;
 const validator_1 = __importDefault(require("validator"));
 const data_source_1 = require("../data-source");
 const Store_1 = require("../entity/Store");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const distance_1 = __importDefault(require("@turf/distance"));
 // Create a store repository that allows us to use TypeORM to interact w/ Store entity in DB.
 const storeRepository = data_source_1.AppDataSource.getRepository(Store_1.Store);
 /**
@@ -30,7 +31,6 @@ const storeRepository = data_source_1.AppDataSource.getRepository(Store_1.Store)
  */
 const createStore = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log("store started");
         const storeData = {
             storeName: req.body.storeName.trim(),
             password: req.body.password.trim(),
@@ -43,17 +43,14 @@ const createStore = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             // Send back a 400 response to acknowledge register attempt but send back errors
             return res.status(400).send({ errors: store });
         }
-        console.log("store is cleaned");
         // All store data was valid - store will now be created properly.
         const salt = bcryptjs_1.default.genSaltSync(10);
         const hashedPass = bcryptjs_1.default.hashSync(store.password, salt);
-        console.log("password hashed");
         const newStore = new Store_1.Store();
         const location = {
             type: "Point",
             coordinates: [125.6, 10.1],
         };
-        console.log("point created");
         newStore.store_name = store.storeName;
         newStore.email = store.email;
         newStore.address = store.address;
@@ -61,9 +58,7 @@ const createStore = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         newStore.password = hashedPass;
         newStore.email_verified = false;
         newStore.location = location;
-        console.log("store created");
         yield storeRepository.save(newStore);
-        console.log("store saved");
         // Send back 201 upon successful creation
         res.status(201).json("New store created.");
     }
@@ -80,17 +75,25 @@ exports.createStore = createStore;
  *
  * @return {null}          Simply sends response back to client to notify of success or failure.
  */
-const getStores = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const fetchStores = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const user_location = req.body.location;
         // get the stores from database
         const stores = yield storeRepository.find();
-        res.status(200).json(stores);
+        const storeInfo = stores.map((store) => {
+            return {
+                storeName: store.store_name,
+                address: store.address,
+                distance: (0, distance_1.default)(user_location, store.location.coordinates),
+            };
+        });
+        res.status(200).json(storeInfo);
     }
     catch (err) {
         res.status(500).send(err);
     }
 });
-exports.getStores = getStores;
+exports.fetchStores = fetchStores;
 /**
  * Handles POST store/login and attempts to log in and authenticate a store.
  *
@@ -170,7 +173,6 @@ const cleanStore = (newStore) => __awaiter(void 0, void 0, void 0, function* () 
         email: "",
         address: "",
     };
-    console.log("cleaning started");
     // Check if a store with this name already exists in the database
     const existingStore = yield storeRepository.findOneBy({
         store_name: newStore.storeName,
@@ -192,9 +194,9 @@ const cleanStore = (newStore) => __awaiter(void 0, void 0, void 0, function* () 
     }
     // TODO: maybe make a better validation for address
     // Check for valid email address
-    if (!validator_1.default.isAlphanumeric(newStore.address)) {
+    if (validator_1.default.isEmpty(newStore.address)) {
         errors.numErrors += 1;
-        errors["address"] = "Please enter a valid address.";
+        errors["address"] = "Please enter an address.";
     }
     // Needs to return either the cleaned user or errors dictionary
     if (errors.numErrors) {
