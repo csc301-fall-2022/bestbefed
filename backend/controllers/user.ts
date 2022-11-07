@@ -8,6 +8,7 @@ import { PaymentInfo, UserErrors, UserRequest } from "./interfaces";
 import { Order } from "../entity/Order";
 import { Inventory } from "../entity/Inventory";
 import { User } from "../entity/User";
+// import { DataSource } from "typeorm";
 
 // Create a user repository that allows us to use TypeORM to interact w/ User entities in DB.
 const userRepository = AppDataSource.getRepository(User);
@@ -36,7 +37,6 @@ const cleanUser = async (newUser: UserRequest) => {
     email: "",
     paymentInfo: [],
   };
-
   // Check if a user with this username exists in the database
   const existingUser: User | null = await userRepository.findOneBy({
     username: newUser.username,
@@ -103,28 +103,41 @@ const cleanUser = async (newUser: UserRequest) => {
 };
 
 /**
+ * Takes in the request data of a "create user" request.
+ *
+ * @param {Request}  requestBody   Object containing request data from sign-in form.
+ *
+ * @return { UserRequest }
+ */
+const constructUserRequest = async (requestBody: Request) => {
+  const userData: UserRequest = {
+    username: (<any>requestBody.body).username.trim(),
+    password: (<any>requestBody.body).password.trim(),
+    firstName: (<any>requestBody.body).firstName.trim(),
+    lastName: (<any>requestBody.body).lastName.trim(),
+    email: (<any>requestBody.body).email.trim(),
+    paymentInfo: {
+      creditCard: (<any>requestBody.body).paymentInfo.creditCard.trim(),
+      expiryDate: (<any>requestBody.body).paymentInfo.expiryDate,
+      cvv: (<any>requestBody.body).paymentInfo.cvv.trim(),
+    },
+  };
+  return userData;
+}
+
+/**
  * Handles POST user/ and attempts to create new User in database.
  *
  * @param {Request}  req   Express.js object that contains all data pertaining to the POST request.
  * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
+ * @param {DataSource} repo   typeorm db.
  *
  * @return {null}          Simply sends response back to client to notify of success or failure.
  */
 export const createUser = async (req: Request, res: Response) => {
   try {
     // Try validating the data entered for the new user.
-    const userData: UserRequest = {
-      username: (<any>req.body).username.trim(),
-      password: (<any>req.body).password.trim(),
-      firstName: (<any>req.body).firstName.trim(),
-      lastName: (<any>req.body).lastName.trim(),
-      email: (<any>req.body).email.trim(),
-      paymentInfo: {
-        creditCard: (<any>req.body).paymentInfo.creditCard.trim(),
-        expiryDate: (<any>req.body).paymentInfo.expiryDate,
-        cvv: (<any>req.body).paymentInfo.cvv.trim(),
-      },
-    };
+    const userData = await constructUserRequest(req);
     const user = await cleanUser(userData);
 
     // Do not proceed with user creation if there are errors with entered data.
