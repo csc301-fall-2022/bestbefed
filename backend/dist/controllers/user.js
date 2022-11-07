@@ -173,7 +173,9 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const payload = {
             id: user.user_id,
         };
-        const token = jsonwebtoken_1.default.sign(payload, (process.env.PRODUCTION ? process.env.SECRET : "hellomyfriend"), {
+        const token = jsonwebtoken_1.default.sign(payload, ((process.env.PRODUCTION == "true"
+            ? process.env.SECRET
+            : "hellomyfriend")), {
             expiresIn: "1d",
         });
         res.status(200).json({

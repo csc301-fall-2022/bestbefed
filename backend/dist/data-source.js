@@ -11,7 +11,7 @@ const OrderedItem_1 = require("./entity/OrderedItem");
 const Store_1 = require("./entity/Store");
 exports.AppDataSource = new typeorm_1.DataSource({
     type: "postgres",
-    host: process.env.PRODUCTION
+    host: process.env.PRODUCTION == "true"
         ? "bestbefed-data.czbbb7d5g36e.us-east-2.rds.amazonaws.com"
         : "localhost",
     port: 5432,
