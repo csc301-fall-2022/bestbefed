@@ -82,18 +82,24 @@ Some of the recent jarring statistics surrounding food waste and insecurity in C
     - This takes them to <https://app.bestbefed.ca/register>, where they can create an account.
     - They must enter valid data for each of the fields, following the guidelines of the validation messages that are dynamically rendered under each field as they type.
 3. Upon successful sign up (all entered data was valid), the user is met with the following screen, where they should click “Sign in” to login to their new account.
+
     <img src="./images/signup.png" width=60%>
+
    - If signup is not successful, the sign up form will render an error message at the top describing the issue (which is almost always because the username is already taken), and the user must fix the problematic data and try again.
+
     <img src="./images/signup-error.png" width=60%>
 
 - If the registration was successful and the user clicked “Sign In”, they are redirected to <https://app.bestbefed.ca/login>. Here, they must enter the username and password for the account they created. After doing so, they should press “Fight Food Waste” to log in.
   - The user may be met with one of two errors. If they entered a username that doesn’t correspond to any existing user on the platform, they will see this error:
 - At sign in, the user will need to enter a valid username - the one they signed up with - to get past this.
   - If the username is valid, but the password they entered does not match to what corresponds for that specific user, they will see this:
+
     <img src="./images/login-error.png" width=60%>
+
 - If the login was successful, the user will be redirected to <https://app.bestbefed.ca>, where they will see the following page:
 
     <img src="./images/main-screen.png" width=60%>
+
 - Since it is currently under development, the user will see a scrollable list of “fake stores” which are fetched from our API/database.
   - In the final product, this list would contain real store data from stores that have registered. Clickable on the map would correspond to each store location and bring up information about that particular store. The user would be able to click each store in the list as well, opening up a specific storefront page for it, showing all the items that could be bought and the current order from that store (if applicable).
 - Users can click and drag on the map to move it around and see what stores are available around Toronto. The user can also press the location target button in the bottom right to center the map on their location.
