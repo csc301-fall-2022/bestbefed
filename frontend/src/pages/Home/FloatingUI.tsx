@@ -32,11 +32,11 @@ function FloatingUI() {
         id="left-panel"
       >
         <Container
-          className="d-flex p-0 justify-content-between pb-3"
+          className="d-flex p-0 justify-content-between pb-3 align-items-center"
           id="nearby-header"
         >
-          <h2>Nearby</h2>
-          <Button variant="outline-dark" className="rounded-5 px-4">
+          <h2 className="my-0">Nearby</h2>
+          <Button variant="outline-dark" className="rounded-5 px-4 my-0">
             <FontAwesomeIcon icon={faSearch} />
           </Button>
         </Container>
