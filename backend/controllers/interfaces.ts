@@ -44,3 +44,9 @@ export interface StoreErrors {
   address: string;
   email: string;
 }
+
+export interface ItemInfo {
+  itemId: number;
+  name: string;
+  price: number;
+}
