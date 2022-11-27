@@ -35,7 +35,14 @@ function App() {
               </RequireAuth>
             }
           />
-          <Route path="/store/:id" element={<Storefront />} />
+          <Route
+            path="/store/:id"
+            element={
+              <RequireAuth loginPath="/login">
+                <Storefront />
+              </RequireAuth>
+            }
+          />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </BrowserRouter>
