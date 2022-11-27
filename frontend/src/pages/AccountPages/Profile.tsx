@@ -1,6 +1,5 @@
 import {useState, useEffect, useRef, FormEvent} from "react";
 import axios from "../../api/axios";
-import { useAuthUser } from "react-auth-kit";
 import "./profile.css";
 import {
     faCarrot,
@@ -9,7 +8,6 @@ import {
   } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import isEmail from "validator/lib/isEmail";
-const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
 const FN_REGEX = /^[A-z][A-z ]{0,23}$/;
 const LN_REGEX = /^[A-z][A-z ]{0,23}$/;
@@ -47,6 +45,8 @@ function Profile() {
                   // update when api is available
             }
         }
+
+        populateDataAsync();
         
     }
     function ValidateCreditCardNumber(ccNum: string) {
@@ -67,12 +67,10 @@ function Profile() {
 
     // for initalizing and setting fetching user data
     const [userdata, setUserData] = useState<any>({});
-    const auth = useAuthUser();
-    
+
     // for backend and submission validation
     const [errormessage, setErrorMessage] = useState("");
     const [succmessage, setSuccMessage] = useState("");
-    const [updated, setUpdated] = useState(false);
 
     // for front end validaiton and display, update when api becomes available
     const errRef = useRef<null | HTMLInputElement>(null);
@@ -103,15 +101,15 @@ function Profile() {
     const [validEmail, setValidEmail] = useState(false);
     const [focusedOnEmail, setEmailFocus] = useState(false);
   
-    const [creditcard, setCc] = useState(userdata.paymentInfo.creditCard || "");
+    const [creditcard, setCc] = useState(userdata.creditcard || "");
     const [validCc, setValidCc] = useState(false);
     const [focusedOnCc, setCcFocus] = useState(false);
   
-    const [exp, setExp] = useState(userdata.paymentInfo.exp || "");
+    const [exp, setExp] = useState(userdata.exp || "");
     const [validExp, setValidExp] = useState(false);
     const [focusedOnExp, setExpFocus] = useState(false);
   
-    const [cvv, setCvv] = useState(userdata.paymentInfo.cvv || "");
+    const [cvv, setCvv] = useState(userdata.cvv || "");
     const [validCvv, setValidCvv] = useState(false);
     const [focusedOnCvv, setCvvFocus] = useState(false);
 
@@ -160,7 +158,6 @@ function Profile() {
 
       useEffect(() => {
         setSuccMessage("");
-        setUpdated(false)
       }, [password, mpassword, firstname, lastname, email]);
     
 
@@ -209,13 +206,11 @@ function Profile() {
             if (exp){
                 request_data.exp = exp;
             }
-
             await axios.patch(PROFILE_URL, JSON.stringify(request_data), {
                 headers: { "Content-Type": "application/json" },
                 withCredentials: true,
               });
             
-            setUpdated(true);
             setSuccMessage("Profile Updated! Nice to know ya")
             
         } catch (err: any) {
@@ -235,12 +230,12 @@ function Profile() {
             <p ref={errRef} className={errormessage ? "errmsg" : "offscreen"}>
               {errormessage}
             </p>
-            <h1>Register </h1>
+            <h1>Update Profile </h1>
 
             <form onSubmit={handleSubmit}>
 
               <label htmlFor="password">
-                Password:
+                New Password:
                 <FontAwesomeIcon
                   icon={faCarrot}
                   className={validPassword ? "valid" : "hide"}
