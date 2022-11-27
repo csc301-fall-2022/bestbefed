@@ -29,9 +29,9 @@ function App() {
           <Route
             path="/cart"
             element={
-              // <RequireAuth loginPath="/login">
-              <Cart />
-              // </RequireAuth>
+              <RequireAuth loginPath="/login">
+                <Cart />
+              </RequireAuth>
             }
           />
           <Route path="*" element={<Navigate to="/" />} />
