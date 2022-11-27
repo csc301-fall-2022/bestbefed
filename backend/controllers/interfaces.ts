@@ -49,4 +49,5 @@ export interface ItemInfo {
   itemId: number;
   name: string;
   price: number;
+  quantity: number;
 }

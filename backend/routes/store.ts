@@ -15,18 +15,19 @@ import { isAuthenticated } from "../controllers/auth";
 
 const router = express.Router();
 
-// Set up route handlers for all routes beginning with "/store"
-router.post("/", createStore);
+// Only an actual user should be making a request here
+router.get("/stores", fetchStores);
 
+// Store inventory CRUD endpoints
+router.patch("/items/:itemId", isAuthenticated, updateInventoryItem);
+router.delete("/items/:itemId", isAuthenticated, removeInventoryItem);
+router.get("/items", isAuthenticated, listInventory);
+router.post("/items", isAuthenticated, addInventoryItem);
+
+// Set up route handlers for all routes beginning with "/store"
 // Store creation and auth
 router.post("/login", loginStore);
 router.get("/logout", logoutStore);
-router.post("/stores", fetchStores);
-
-// Store inventory CRUD endpoints
-router.get("/items", isAuthenticated, listInventory);
-router.post("/items/add", isAuthenticated, addInventoryItem);
-router.patch("/items/:itemId", isAuthenticated, updateInventoryItem);
-router.delete("/items/:itemId", isAuthenticated, removeInventoryItem);
+router.post("/", createStore);
 
 export default router;
