@@ -76,9 +76,8 @@ export const fetchStores = async (req: Request, res: Response) => {
 
     // Takes the URL value tagged by "storeName"
     const requested_store_name: string = (<any>req.query).storeName;
-
     // if the user did not add "storeName" tag to URL as a filter
-    if (requested_store_name == "") {
+    if (!requested_store_name) {
       // get the stores from database
       const stores: Store[] | null = await storeRepository.find();
       const storeInfo: StoreInfo[] = stores.map((store) => {
@@ -92,9 +91,8 @@ export const fetchStores = async (req: Request, res: Response) => {
     }
     else {
       // if the user did add "storeName" tag to URL as a filter
-      // get the stores from database filtered by store names LIKE the requested store name
-      const stores: Store[] | null = await storeRepository.findBy({
-        store_name: Like("%${requested_store_name}%"),
+      const stores: Store[] = await storeRepository.findBy({
+        store_name: Like(`%${requested_store_name}%`),
       });
       const storeInfo: StoreInfo[] = stores.map((store) => {
         return <StoreInfo>{
