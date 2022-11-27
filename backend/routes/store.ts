@@ -21,8 +21,9 @@ router.get("/stores", fetchStores);
 // Store inventory CRUD endpoints
 router.patch("/items/:itemId", isAuthenticated, updateInventoryItem);
 router.delete("/items/:itemId", isAuthenticated, removeInventoryItem);
-router.get("/items", isAuthenticated, listInventory);
 router.post("/items", isAuthenticated, addInventoryItem);
+router.get("/items", listInventory);
+
 
 // Set up route handlers for all routes beginning with "/store"
 // Store creation and auth
