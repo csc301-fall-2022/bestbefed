@@ -2,6 +2,7 @@ import React from "react";
 import { Route, Routes, BrowserRouter, Navigate } from "react-router-dom";
 import { AuthProvider, RequireAuth } from "react-auth-kit";
 import { Login, Logout, Register } from "./pages/AccountPages";
+import Profile from "./pages/AccountPages/Profile"
 import Cart from "./pages/Cart/Cart";
 import Home from "./pages/Home/Home";
 
@@ -20,6 +21,14 @@ function App() {
             element={
               <RequireAuth loginPath="/login">
                 <Home />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/"
+            element={
+              <RequireAuth loginPath="/login">
+                <Profile />
               </RequireAuth>
             }
           />
