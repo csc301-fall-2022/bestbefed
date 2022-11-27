@@ -7,6 +7,7 @@ import bcrypt from "bcryptjs";
 import { Point } from "geojson";
 import jwt from "jsonwebtoken";
 import distance from "@turf/distance";
+import {Like} from "typeorm";
 
 // Create a store repository that allows us to use TypeORM to interact w/ Store entity in DB.
 const storeRepository = AppDataSource.getRepository(Store);
@@ -72,16 +73,38 @@ export const createStore = async (req: Request, res: Response) => {
 export const fetchStores = async (req: Request, res: Response) => {
   try {
     const user_location: number[] = (<any>req.body).location;
-    // get the stores from database
-    const stores: Store[] | null = await storeRepository.find();
-    const storeInfo: StoreInfo[] = stores.map((store) => {
-      return <StoreInfo>{
-        storeName: store.store_name,
-        address: store.address,
-        distance: distance(user_location, store.location.coordinates),
-      };
-    });
-    res.status(200).json(storeInfo);
+
+    // Takes the URL value tagged by "storeName"
+    const requested_store_name: string = (<any>req.query).storeName;
+
+    // if the user did not add "storeName" tag to URL as a filter
+    if (requested_store_name == "") {
+      // get the stores from database
+      const stores: Store[] | null = await storeRepository.find();
+      const storeInfo: StoreInfo[] = stores.map((store) => {
+        return <StoreInfo>{
+          storeName: store.store_name,
+          address: store.address,
+          distance: distance(user_location, store.location.coordinates),
+        };
+      });
+      res.status(200).json(storeInfo);
+    }
+    else {
+      // if the user did add "storeName" tag to URL as a filter
+      // get the stores from database filtered by store names LIKE the requested store name
+      const stores: Store[] | null = await storeRepository.findBy({
+        store_name: Like("%${requested_store_name}%"),
+      });
+      const storeInfo: StoreInfo[] = stores.map((store) => {
+        return <StoreInfo>{
+          storeName: store.store_name,
+          address: store.address,
+          distance: distance(user_location, store.location.coordinates),
+        };
+      });
+      res.status(200).json(storeInfo);
+    }   
   } catch (err) {
     res.status(500).send(err);
   }
