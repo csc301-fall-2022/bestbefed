@@ -4,6 +4,7 @@ import { AuthProvider, RequireAuth } from "react-auth-kit";
 import { Login, Logout, Register } from "./pages/AccountPages";
 import Cart from "./pages/Cart/Cart";
 import Home from "./pages/Home/Home";
+import Storefront from "./pages/Storefront/Storefront";
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
               </RequireAuth>
             }
           />
+          <Route path="/store/:id" element={<Storefront />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </BrowserRouter>

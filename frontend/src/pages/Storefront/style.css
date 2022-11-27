@@ -1,0 +1,14 @@
+.item-quantity {
+  font-style: italic;
+  background: none;
+  width: auto;
+  text-align: center;
+  width: 3em;
+  border: none;
+  text-align: right;
+}
+
+input[type="number"]::-webkit-inner-spin-button {
+  margin-left: 0.5em;
+  opacity: 1;
+}
