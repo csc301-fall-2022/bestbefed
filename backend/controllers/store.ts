@@ -72,7 +72,7 @@ export const createStore = async (req: Request, res: Response) => {
  */
 export const fetchStores = async (req: Request, res: Response) => {
   try {
-    const user_location: number[] = (<any>req.body).location;
+    const user_location: number[] = (<any>req.query).location;
 
     // Takes the URL value tagged by "storeName"
     const requested_store_name: string = (<any>req.query).storeName;

@@ -7,24 +7,30 @@ import mapboxgl from "mapbox-gl";
 mapboxgl.accessToken =
   "pk.eyJ1IjoiMWl6YXJkbyIsImEiOiJjbGEzNGRxeTMwbmo4M3BtaHhieDR5MnBrIn0.SOAbn6BE5Qqm86_K5jmECw";
 
-function Map() {
+function Map({
+  curLocation,
+  setCurLocation,
+}: {
+  curLocation: mapboxgl.LngLat | null;
+  setCurLocation: (location: mapboxgl.LngLat) => void;
+}) {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [mapLocation, setMapLocation] = useState<mapboxgl.LngLat>(
     new mapboxgl.LngLat(-79.38198, 43.64847)
   );
-  let curLocation: mapboxgl.LngLat | null = null;
 
   const fetchLocation = async () => {
     if (navigator.geolocation) {
       let result = await navigator.permissions.query({ name: "geolocation" });
       if (result.state !== "denied") {
         navigator.geolocation.getCurrentPosition((position) => {
-          curLocation = new mapboxgl.LngLat(
-            position.coords.longitude,
-            position.coords.latitude
+          setCurLocation(
+            new mapboxgl.LngLat(
+              position.coords.longitude,
+              position.coords.latitude
+            )
           );
-          setMapLocation(curLocation);
         });
       }
     }
@@ -66,6 +72,11 @@ function Map() {
         });
     });
   });
+
+  // Update map location when we get a new current location
+  useEffect(() => {
+    if (curLocation) setMapLocation(curLocation);
+  }, [curLocation]);
 
   // Update map center any time lng/lat changes
   useEffect(() => {
