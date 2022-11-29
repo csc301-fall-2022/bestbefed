@@ -143,6 +143,7 @@ const loginStore = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         }
         // Create the JWT to provide store with authentication.
         const payload = {
+            type: "store",
             id: store.store_id,
         };
         const token = jsonwebtoken_1.default.sign(payload, ((process.env.PRODUCTION == "true"

@@ -6,7 +6,7 @@ import validator from "validator";
 import { AppDataSource } from "../data-source";
 import { PaymentInfo, UserErrors, UserRequest } from "./interfaces";
 import { Order } from "../entity/Order";
-import { Inventory } from "../entity/Inventory";
+import { InventoryItem } from "../entity/InventoryItem";
 import { User } from "../entity/User";
 // import { DataSource } from "typeorm";
 
@@ -198,6 +198,7 @@ export const loginUser = async (req: Request, res: Response) => {
 
     // Create the JWT to provide user with authentication.
     const payload = {
+      type: "user",
       id: user.user_id,
     };
     const token = jwt.sign(

@@ -1,0 +1,14 @@
+.header {
+  margin: auto;
+  width: 90%;
+  height: 15%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.heading {
+  font-size: 50px;
+  font-weight: 700;
+  color: black;
+}

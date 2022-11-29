@@ -136,6 +136,7 @@ export const loginStore = async (req: Request, res: Response) => {
 
     // Create the JWT to provide store with authentication.
     const payload = {
+      type: "store",
       id: store.store_id,
     };
     const token = jwt.sign(

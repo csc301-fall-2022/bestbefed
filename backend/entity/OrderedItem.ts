@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, BaseEntity, ManyToOne } from "typeorm";
-import { Inventory } from "./Inventory";
+import { InventoryItem } from "./InventoryItem";
 import { Order } from "./Order";
 
 @Entity()
@@ -8,8 +8,8 @@ export class OrderedItem extends BaseEntity {
   @PrimaryGeneratedColumn()
   item_id!: Number;
 
-  @ManyToOne(() => Inventory, (inventory) => inventory.item_id)
-  inventory_item!: Inventory;
+  @ManyToOne(() => InventoryItem, (inventoryItem) => inventoryItem.item_id)
+  inventory_item!: InventoryItem;
 
   @ManyToOne(() => Order, (order) => order.order_id)
   order!: Order;

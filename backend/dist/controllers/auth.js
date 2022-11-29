@@ -28,10 +28,22 @@ const isAuthenticated = (req, res, next) => {
                 .json("Session token is invalid. Please login again.")
                 .status(403);
         }
-        // Successful JWT Verify decodes the payload, i.e., we will have access to the user's uuid
-        req.user = {
-            id: payload.id,
-        };
+        // Add a property to the request containing user or store's id
+        if (payload.type === "user") {
+            // Successful JWT Verify decodes the payload, i.e., we will have access to the user's uuid
+            req.user = {
+                id: payload.id,
+            };
+        }
+        else if (payload.type === "store") {
+            // Successful JWT Verify decodes the payload, i.e., we will have access to the user's uuid
+            req.store = {
+                id: payload.id,
+            };
+        }
+        else {
+            return res.status(401).json("This token doesn't correspond to a valid user.");
+        }
         next();
     });
 };
