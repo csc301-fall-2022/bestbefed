@@ -8,8 +8,6 @@ const store_1 = require("../controllers/store");
 const inventory_1 = require("../controllers/inventory");
 const auth_1 = require("../controllers/auth");
 const router = express_1.default.Router();
-// Only an actual user should be making a request here
-router.get("/stores", store_1.fetchStores);
 // Store inventory CRUD endpoints
 router.patch("/items/:itemId", auth_1.isAuthenticated, inventory_1.updateInventoryItem);
 router.delete("/items/:itemId", auth_1.isAuthenticated, inventory_1.removeInventoryItem);
@@ -19,5 +17,6 @@ router.get("/items", inventory_1.listInventory);
 // Store creation and auth
 router.post("/login", store_1.loginStore);
 router.get("/logout", store_1.logoutStore);
+router.get("/stores", store_1.fetchStores);
 router.post("/", store_1.createStore);
 exports.default = router;
