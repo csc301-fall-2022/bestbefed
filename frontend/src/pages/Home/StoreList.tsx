@@ -22,13 +22,14 @@ function StoreList({
   const [noneFound, setNoneFound] = useState(false);
 
   const getStores = async () => {
+    console.log(curLocation ? curLocation?.toArray() : [0, 0]);
     axios
       .get(POST_STORE_URL, {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
         params: {
           storeName: query,
-          location: curLocation?.toArray() ? curLocation : [0, 0],
+          location: curLocation ? curLocation?.toArray() : [0, 0],
         },
       })
       .then((response) => {
@@ -43,7 +44,7 @@ function StoreList({
 
   useEffect(() => {
     getStores();
-  }, [query]);
+  }, [query, curLocation]);
 
   if (noneFound || stores.length === 0) {
     return (
