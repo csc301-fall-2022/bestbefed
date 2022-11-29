@@ -11,6 +11,7 @@ function StoreListItem({ name, category, distance, description }: Store) {
           {category} Store - {distance.toFixed(1)} km away
         </Card.Subtitle>
         <Card.Text>{description}</Card.Text>
+        <a href="/store/1" className="stretched-link"></a>
       </Card.Body>
     </Card>
   );
