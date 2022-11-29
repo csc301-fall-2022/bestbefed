@@ -62,7 +62,7 @@ const isOwnedItem = (itemId, storeId) => __awaiter(void 0, void 0, void 0, funct
             store: true,
         },
         where: {
-            item_id: itemId
+            item_id: itemId,
         },
     });
     if (((_a = item === null || item === void 0 ? void 0 : item.store) === null || _a === void 0 ? void 0 : _a.store_id) !== storeId) {
@@ -80,16 +80,30 @@ const isOwnedItem = (itemId, storeId) => __awaiter(void 0, void 0, void 0, funct
  */
 const listInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        // Grab the store's uuid from the payload of the token held by the cookie
-        const storeId = req.store;
-        // Query for all the items for this store. 
+        // Attempt to get store ID from URL query params
+        let storeId = req.query.storeId;
+        if (!storeId) {
+            // Store ID not specified in URL query params
+            // Grab the store's uuid from the payload of the token held by the cookie
+            storeId = req.store;
+        }
+        if (!storeId) {
+            return res.status(400).json("Store not specified");
+        }
+        const store = yield storeRepository.findOneBy({
+            store_id: storeId,
+        });
+        if (!store) {
+            return res.status(404).json("Store not found");
+        }
+        // Query for all the items for this store.
         const items = yield inventoryRepository.find({
             relations: {
                 store: true,
             },
             where: {
                 store: {
-                    store_id: storeId // Syntax for querying for an item based on elements of embedded entities/FK relations
+                    store_id: storeId, // Syntax for querying for an item based on elements of embedded entities/FK relations
                 },
             },
         });
@@ -122,7 +136,9 @@ const addInventoryItem = (req, res) => __awaiter(void 0, void 0, void 0, functio
     try {
         // Get the store whose inventory we are manipulating
         const storeId = req.store.id;
-        const store = yield storeRepository.findOneBy({ store_id: storeId });
+        const store = yield storeRepository.findOneBy({
+            store_id: storeId,
+        });
         if (!store) {
             return res.status(404).json("Store not found");
         }
