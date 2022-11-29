@@ -8,7 +8,7 @@ function StoreListItem({ name, category, distance, description }: Store) {
       <Card.Body className="p-0">
         <Card.Title>{name}</Card.Title>
         <Card.Subtitle className="mb-2 text-muted">
-          {category} Store - {distance.toFixed(1)} km away
+          {category} Store {distance ? `- ${distance.toFixed(1)} km away` : ""}
         </Card.Subtitle>
         <Card.Text>{description}</Card.Text>
         <a href="/store/1" className="stretched-link"></a>

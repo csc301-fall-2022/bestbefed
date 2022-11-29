@@ -7,40 +7,61 @@ const POST_STORE_URL = "/store/stores";
 export interface Store {
   name: string;
   category: string;
-  distance: number;
+  distance: number | null;
   description: string;
 }
 
-function StoreList() {
+function StoreList({
+  query,
+  curLocation,
+}: {
+  query: string;
+  curLocation: mapboxgl.LngLat | null;
+}) {
   const [stores, setStores] = useState([]);
+  const [noneFound, setNoneFound] = useState(false);
+
   const getStores = async () => {
-    const user_loc = {
-      location: [12, 13],
-    };
-    const { data } = await axios.post(
-      POST_STORE_URL,
-      JSON.stringify(user_loc),
-      {
+    axios
+      .get(POST_STORE_URL, {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
-      }
-    );
-    setStores(data);
+        params: {
+          storeName: query,
+          location: curLocation?.toArray() ? curLocation : [0, 0],
+        },
+      })
+      .then((response) => {
+        setStores(response.data);
+        setNoneFound(false);
+      })
+      .catch((err) => {
+        console.error("Unable to fetch stores");
+        setNoneFound(true);
+      });
   };
 
   useEffect(() => {
     getStores();
-  }, []);
+  }, [query]);
 
+  if (noneFound || stores.length === 0) {
+    return (
+      <Container className="d-flex flex-grow-1 store-list px-0 align-items-center justify-content-center">
+        <div className="fs-5 fst-italic text-secondary">No stores found</div>
+      </Container>
+    );
+  }
   return (
-    <Container className="flex-grow-1 store-list px-0">
-      {stores.map(({ address, storeName, distance, description }) => {
+    <Container className="flex-grow-1 store-list px-0 pt-3">
+      {stores.map(({ address, storeName, distance, description }, i) => {
         return (
           <StoreListItem
             name={storeName}
             category="Grocery"
-            distance={distance}
+            distance={curLocation ? distance : null}
             description={address}
+            key={i}
           />
         );
       })}
