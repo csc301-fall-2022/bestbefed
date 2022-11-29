@@ -35,10 +35,20 @@ export const isAuthenticated = (
           .status(403);
       }
 
-      // Successful JWT Verify decodes the payload, i.e., we will have access to the user's uuid
-      (<any>req).user = {
-        id: <string>payload.id,
-      };
+      // Add a property to the request containing user or store's id
+      if (<string>payload.type === "user") {
+        // Successful JWT Verify decodes the payload, i.e., we will have access to the user's uuid
+        (<any>req).user = {
+          id: <string>payload.id,
+        };
+      } else if (<string>payload.type === "store") {
+        // Successful JWT Verify decodes the payload, i.e., we will have access to the user's uuid
+        (<any>req).store = {
+          id: <string>payload.id,
+        };
+      } else {
+        return res.status(401).json("This token doesn't correspond to a valid user.");
+      }
 
       next();
     }

@@ -18,6 +18,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const validator_1 = __importDefault(require("validator"));
 const data_source_1 = require("../data-source");
 const User_1 = require("../entity/User");
+// import { DataSource } from "typeorm";
 // Create a user repository that allows us to use TypeORM to interact w/ User entities in DB.
 const userRepository = data_source_1.AppDataSource.getRepository(User_1.User);
 // Helper functions
@@ -98,28 +99,40 @@ const cleanUser = (newUser) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 /**
+ * Takes in the request data of a "create user" request.
+ *
+ * @param {Request}  requestBody   Object containing request data from sign-in form.
+ *
+ * @return { UserRequest }
+ */
+const constructUserRequest = (requestBody) => __awaiter(void 0, void 0, void 0, function* () {
+    const userData = {
+        username: requestBody.body.username.trim(),
+        password: requestBody.body.password.trim(),
+        firstName: requestBody.body.firstName.trim(),
+        lastName: requestBody.body.lastName.trim(),
+        email: requestBody.body.email.trim(),
+        paymentInfo: {
+            creditCard: requestBody.body.paymentInfo.creditCard.trim(),
+            expiryDate: requestBody.body.paymentInfo.expiryDate,
+            cvv: requestBody.body.paymentInfo.cvv.trim(),
+        },
+    };
+    return userData;
+});
+/**
  * Handles POST user/ and attempts to create new User in database.
  *
  * @param {Request}  req   Express.js object that contains all data pertaining to the POST request.
  * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
+ * @param {DataSource} repo   typeorm db.
  *
  * @return {null}          Simply sends response back to client to notify of success or failure.
  */
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Try validating the data entered for the new user.
-        const userData = {
-            username: req.body.username.trim(),
-            password: req.body.password.trim(),
-            firstName: req.body.firstName.trim(),
-            lastName: req.body.lastName.trim(),
-            email: req.body.email.trim(),
-            paymentInfo: {
-                creditCard: req.body.paymentInfo.creditCard.trim(),
-                expiryDate: req.body.paymentInfo.expiryDate,
-                cvv: req.body.paymentInfo.cvv.trim(),
-            },
-        };
+        const userData = yield constructUserRequest(req);
         const user = yield cleanUser(userData);
         // Do not proceed with user creation if there are errors with entered data.
         if (isUserErrors(user)) {
@@ -171,6 +184,7 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
         // Create the JWT to provide user with authentication.
         const payload = {
+            type: "user",
             id: user.user_id,
         };
         const token = jsonwebtoken_1.default.sign(payload, ((process.env.PRODUCTION == "true"
