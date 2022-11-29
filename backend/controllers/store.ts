@@ -71,9 +71,12 @@ export const createStore = async (req: Request, res: Response) => {
  */
 export const fetchStores = async (req: Request, res: Response) => {
   try {
+    const requested_store_name: string = (<any>req.query).storeName;
     const user_location: number[] = (<any>req.body).location;
     // get the stores from database
     const stores: Store[] | null = await storeRepository.find();
+    const st: Store = stores[0];
+    console.log(stores[0].location.coordinates);
     const storeInfo: StoreInfo[] = stores.map((store) => {
       return <StoreInfo>{
         storeName: store.store_name,

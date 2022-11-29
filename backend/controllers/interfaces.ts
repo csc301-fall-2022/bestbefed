@@ -44,3 +44,17 @@ export interface StoreErrors {
   address: string;
   email: string;
 }
+
+export interface CleanCartInfo {
+  quantity: number;
+  inventoryItemId: number;
+}
+
+export interface CartItemInfo {
+  cart_id: number;
+  name: string;
+  store: string;
+  quantity: number;
+  price: number;
+  inventory_item: number;
+}
