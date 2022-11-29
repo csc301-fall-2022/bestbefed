@@ -7,7 +7,7 @@ import bcrypt from "bcryptjs";
 import { Point } from "geojson";
 import jwt from "jsonwebtoken";
 import distance from "@turf/distance";
-import {Like} from "typeorm";
+import { ILike } from "typeorm";
 
 // Create a store repository that allows us to use TypeORM to interact w/ Store entity in DB.
 const storeRepository = AppDataSource.getRepository(Store);
@@ -88,11 +88,10 @@ export const fetchStores = async (req: Request, res: Response) => {
         };
       });
       res.status(200).json(storeInfo);
-    }
-    else {
+    } else {
       // if the user did add "storeName" tag to URL as a filter
       const stores: Store[] = await storeRepository.findBy({
-        store_name: Like(`%${requested_store_name}%`),
+        store_name: ILike(`%${requested_store_name}%`),
       });
       const storeInfo: StoreInfo[] = stores.map((store) => {
         return <StoreInfo>{
@@ -102,7 +101,7 @@ export const fetchStores = async (req: Request, res: Response) => {
         };
       });
       res.status(200).json(storeInfo);
-    }   
+    }
   } catch (err) {
     res.status(500).send(err);
   }
