@@ -252,7 +252,7 @@ export const logoutUser = (req: Request, res: Response) => {
  */
 export const getUserProfile = async (req: Request, res: Response) => {
     try {
-        // Fetch the respective user's data from the database
+      // Fetch the respective user's data from the database
       const userId: string = (<any>req).user.id;
       const user: User | null = await userRepository.findOneBy({
         user_id: userId,
@@ -278,13 +278,43 @@ export const getUserProfile = async (req: Request, res: Response) => {
 /**
  * Handles PATCH request to /user/profile to update data for a user's profile
  *
- * @param {Request}  req   Express.js object that contains all data pertaining to the GET request.
+ * @param {Request}  req   Express.js object that has a request body in the format of ProfileInfo (patch request)
  * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
  *
- * @return {ProfileInfo}          Simply sends response back to client to notify of success or failure after trying to clear cookie.
+ * @return {ProfileInfo}          Sends back an object of the user's newly updated data
  */
-export const updateUserProfile = (req: Request, res: Response) => {
+export const updateUserProfile = async (req: Request, res: Response) => {
   // TODO: Add validation for incoming data
+  try {
+    // Update the profile of the user that sent this request
+    const userId: string = (<any>req).user.id;
 
+    // If the user changed their password, re-hash it before storing
+    if ((<ProfileInfo>req.body).password) {
+      const salt = bcrypt.genSaltSync(10);
+      const password: string = (<ProfileInfo>req.body).password!;
+      const hashedPass: string = bcrypt.hashSync(password, salt);
+      (<ProfileInfo>req.body).password = hashedPass;
+    }
+    await userRepository.update(userId, <ProfileInfo>req.body);
 
+    // TODO: Duplicate code seen in getUserProfile - maybe refactor
+    // Send the user's newly updated data back to them
+    const user: User | null = await userRepository.findOneBy({
+      user_id: userId,
+    }); 
+    const profileData: ProfileInfo = {
+      firstName: user?.firstName,
+      lastName: user?.lastName,
+      email: user?.email,
+      password: user?.password,
+      creditCard: user?.payment_info.creditCard,
+      cvv: user?.payment_info.cvv,
+      exp: user?.payment_info.expiryDate,
+    };
+
+    res.status(200).json(profileData);
+  } catch (err) {
+    res.status(500).send(err);
+  }
 }
