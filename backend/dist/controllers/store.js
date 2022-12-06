@@ -189,7 +189,7 @@ const getStoreProfile = (req, res) => __awaiter(void 0, void 0, void 0, function
             store_id: storeId,
         });
         const profileData = {
-            storeName: store === null || store === void 0 ? void 0 : store.store_name,
+            store_name: store === null || store === void 0 ? void 0 : store.store_name,
             password: store === null || store === void 0 ? void 0 : store.password,
             address: store === null || store === void 0 ? void 0 : store.address,
             email: store === null || store === void 0 ? void 0 : store.email,
@@ -202,9 +202,43 @@ const getStoreProfile = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.getStoreProfile = getStoreProfile;
-// TODO: Implement
-// TODO: Test getStoreProfile
+/**
+ * Handles PATCH request to /store/profile to update data for a store's profile
+ *
+ * @param {Request}  req   Express.js object that has a request body in the format of StoreProfileInfo (patch request)
+ * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
+ *
+ * @return {StoreProfileInfo}          Sends back an object of the store's newly updated data
+ */
 const updateStoreProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // TODO: Add validation for incoming data
+    try {
+        // Update the profile of the store that sent this request
+        const storeId = req.store.id;
+        // If the store changed their password, re-hash it before storing
+        if (req.body.password) {
+            const salt = bcryptjs_1.default.genSaltSync(10);
+            const password = req.body.password;
+            const hashedPass = bcryptjs_1.default.hashSync(password, salt);
+            req.body.password = hashedPass;
+        }
+        yield storeRepository.update(storeId, req.body);
+        // TODO: Duplicate code seen in getStoreProfile - maybe refactor
+        // Send the store's newly updated data back to them
+        const store = yield storeRepository.findOneBy({
+            store_id: storeId,
+        });
+        const profileData = {
+            store_name: store === null || store === void 0 ? void 0 : store.store_name,
+            password: store === null || store === void 0 ? void 0 : store.password,
+            address: store === null || store === void 0 ? void 0 : store.address,
+            email: store === null || store === void 0 ? void 0 : store.email,
+        };
+        res.status(200).json(profileData);
+    }
+    catch (err) {
+        res.status(500).send(err);
+    }
 });
 exports.updateStoreProfile = updateStoreProfile;
 // Helper functions

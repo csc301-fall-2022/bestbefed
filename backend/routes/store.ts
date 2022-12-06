@@ -25,6 +25,7 @@ router.get("/items", listInventory);
 
 // Store profile endpoints
 router.get("/profile", isAuthenticated, getStoreProfile);
+router.patch("/profile", isAuthenticated, updateStoreProfile);
 
 // Set up route handlers for all routes beginning with "/store"
 // Store creation and auth

@@ -63,7 +63,7 @@ export interface ProfileInfo {
 }
 
 export interface StoreProfileInfo {
-  storeName?: string;
+  store_name?: string;
   password?: string;
   address?: string;
   email?: string;
