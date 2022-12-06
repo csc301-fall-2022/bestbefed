@@ -61,3 +61,10 @@ export interface ProfileInfo {
   cvv?: string;
   exp?: string;
 }
+
+export interface StoreProfileInfo {
+  storeName?: string;
+  password?: string;
+  address?: string;
+  email?: string;
+}

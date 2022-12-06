@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logoutStore = exports.loginStore = exports.fetchStores = exports.createStore = void 0;
+exports.updateStoreProfile = exports.getStoreProfile = exports.logoutStore = exports.loginStore = exports.fetchStores = exports.createStore = void 0;
 const validator_1 = __importDefault(require("validator"));
 const data_source_1 = require("../data-source");
 const Store_1 = require("../entity/Store");
@@ -173,6 +173,40 @@ const logoutStore = (req, res) => {
     res.status(200).send("Logged out!");
 };
 exports.logoutStore = logoutStore;
+/**
+ * Handles GET request to /store/profile to provide data to prepopulate a store profile form on frontend.
+ *
+ * @param {Request}  req   Express.js object that contains all data pertaining to the GET request.
+ * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
+ *
+ * @return {StoreProfileInfo}          Sends back the fields of the store's profile data
+ */
+const getStoreProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Fetch the respective store's data from the database
+        const storeId = req.store.id;
+        const store = yield storeRepository.findOneBy({
+            store_id: storeId,
+        });
+        const profileData = {
+            storeName: store === null || store === void 0 ? void 0 : store.store_name,
+            password: store === null || store === void 0 ? void 0 : store.password,
+            address: store === null || store === void 0 ? void 0 : store.address,
+            email: store === null || store === void 0 ? void 0 : store.email,
+        };
+        // Send store their profile data
+        res.status(200).json(profileData);
+    }
+    catch (err) {
+        res.status(500).send(err);
+    }
+});
+exports.getStoreProfile = getStoreProfile;
+// TODO: Implement
+// TODO: Test getStoreProfile
+const updateStoreProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+});
+exports.updateStoreProfile = updateStoreProfile;
 // Helper functions
 const isStoreErrors = (obj) => {
     return "numErrors" in obj;
