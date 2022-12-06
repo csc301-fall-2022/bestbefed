@@ -51,3 +51,13 @@ export interface ItemInfo {
   price: number;
   quantity: number;
 }
+
+export interface ProfileInfo {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  password?: string;
+  creditCard?: string;
+  cvv?: string;
+  exp?: string;
+}

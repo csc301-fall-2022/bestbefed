@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import validator from "validator";
 
 import { AppDataSource } from "../data-source";
-import { PaymentInfo, UserErrors, UserRequest } from "./interfaces";
+import { PaymentInfo, UserErrors, UserRequest, ProfileInfo } from "./interfaces";
 import { Order } from "../entity/Order";
 import { InventoryItem } from "../entity/InventoryItem";
 import { User } from "../entity/User";
@@ -212,7 +212,11 @@ export const loginUser = async (req: Request, res: Response) => {
         expiresIn: "1d",
       }
     );
-    res.status(200).json({
+    res
+      .cookie("access_token", token, {
+        httpOnly: false,
+      })
+      .status(200).json({
       token: token,
       expiresIn: "1440",
       authUserState: {
@@ -237,3 +241,50 @@ export const logoutUser = (req: Request, res: Response) => {
   res.clearCookie("access_token");
   res.status(200).send("Logged out!");
 };
+
+/**
+ * Handles GET request to /user/profile to provide data to prepopulate a profile form on frontend.
+ *
+ * @param {Request}  req   Express.js object that contains all data pertaining to the GET request.
+ * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
+ *
+ * @return {ProfileInfo}          Sends back 
+ */
+export const getUserProfile = async (req: Request, res: Response) => {
+    try {
+        // Fetch the respective user's data from the database
+      const userId: string = (<any>req).user.id;
+      const user: User | null = await userRepository.findOneBy({
+        user_id: userId,
+      });
+
+      const profileData: ProfileInfo = {
+        firstName: user?.firstName,
+        lastName: user?.lastName,
+        email: user?.email,
+        password: user?.password,
+        creditCard: user?.payment_info.creditCard,
+        cvv: user?.payment_info.cvv,
+        exp: user?.payment_info.expiryDate,
+      };
+
+      // Send user their profile data
+      res.status(200).json(profileData);
+    } catch (err) {
+      res.status(500).send(err);
+    }
+}
+
+/**
+ * Handles PATCH request to /user/profile to update data for a user's profile
+ *
+ * @param {Request}  req   Express.js object that contains all data pertaining to the GET request.
+ * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
+ *
+ * @return {ProfileInfo}          Simply sends response back to client to notify of success or failure after trying to clear cookie.
+ */
+export const updateUserProfile = (req: Request, res: Response) => {
+  // TODO: Add validation for incoming data
+
+
+}
