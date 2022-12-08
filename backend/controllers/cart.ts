@@ -12,7 +12,7 @@ const userRepository = AppDataSource.getRepository(User);
 const inventoryRepository = AppDataSource.getRepository(Inventory);
 
 /**
- * Handles GET user/items and attempts to get all the items in the databse for a specified user
+ * Handles POST user/items and attempts to add an item to the user's cart
  *
  * @param {Request}  req   Express.js object that contains all data pertaining to the POST request.
  * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
@@ -48,6 +48,7 @@ export const addCartItem = async (req: Request, res: Response) => {
       return res.status(404).json("The item was not found in inventory");
     }
 
+    // creates the item and adds it to the database
     const newCartItem: CartItem = new CartItem();
     newCartItem.customer = user;
     newCartItem.quantity = cartItem.quantity;
@@ -69,12 +70,12 @@ export const addCartItem = async (req: Request, res: Response) => {
 };
 
 /**
- * Handles POST user/items and attempts to add an item to the database for the users cart.
+ * Handles DELETE user/items/:cartItemId/:clearAll and attempts to remove 1 or all of the items of a user's cart
  *
  * @param {Request}  req   Express.js object that contains all data pertaining to the POST request.
  * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
  *
- * @return {null}          Simply sends response back to client to notify if success or specifies the error
+ * @return {String}          Simply sends response back to client to notify if cleared all or cleared 1 or error
  */
 export const removeCartItem = async (req: Request, res: Response) => {
   try {
@@ -119,12 +120,12 @@ export const removeCartItem = async (req: Request, res: Response) => {
 };
 
 /**
- * Handles POST store/ and attempts to create new Store in database.
+ * Handles PATCH user/items/:cartItemId and attempts to update the quantity of a user's item
  *
  * @param {Request}  req   Express.js object that contains all data pertaining to the POST request.
  * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
  *
- * @return {null}          Simply sends response back to client to notify if success or specifies the error
+ * @return {String}          Simply sends response back to client to notify if success or specifies the error
  */
 export const updateCartQuantity = async (req: Request, res: Response) => {
   try {
@@ -165,12 +166,12 @@ export const updateCartQuantity = async (req: Request, res: Response) => {
 };
 
 /**
- * Handles POST store/login and attempts to log in and authenticate a store.
+ * Handles GET user/items and attempts to get all the items from a users cart
  *
  * @param {Request}  req   Express.js object that contains all data pertaining to the POST request.
  * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
  *
- * @return {null}          Simply sends response back to client to notify if success or specifies the error
+ * @return {Int}          Returns the total price of the list of items
  */
 export const listCartItem = async (req: Request, res: Response) => {
   try {
@@ -192,6 +193,7 @@ export const listCartItem = async (req: Request, res: Response) => {
       username: "testyt3",
     });
 
+    // find the items by the user
     const cartItems: CartItem[] | null = await cartRepository.find({
       relations: ["customer", "cart_item", "cart_item.store"],
       where: {
