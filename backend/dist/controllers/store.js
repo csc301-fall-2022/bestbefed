@@ -19,6 +19,7 @@ const Store_1 = require("../entity/Store");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const distance_1 = __importDefault(require("@turf/distance"));
+const typeorm_1 = require("typeorm");
 // Create a store repository that allows us to use TypeORM to interact w/ Store entity in DB.
 const storeRepository = data_source_1.AppDataSource.getRepository(Store_1.Store);
 /**
@@ -77,17 +78,36 @@ exports.createStore = createStore;
  */
 const fetchStores = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user_location = req.body.location;
-        // get the stores from database
-        const stores = yield storeRepository.find();
-        const storeInfo = stores.map((store) => {
-            return {
-                storeName: store.store_name,
-                address: store.address,
-                distance: (0, distance_1.default)(user_location, store.location.coordinates),
-            };
-        });
-        res.status(200).json(storeInfo);
+        const user_location = req.query.location;
+        // Takes the URL value tagged by "storeName"
+        const requested_store_name = req.query.storeName;
+        // if the user did not add "storeName" tag to URL as a filter
+        if (!requested_store_name) {
+            // get the stores from database
+            const stores = yield storeRepository.find();
+            const storeInfo = stores.map((store) => {
+                return {
+                    storeName: store.store_name,
+                    address: store.address,
+                    distance: (0, distance_1.default)(user_location, store.location.coordinates),
+                };
+            });
+            res.status(200).json(storeInfo);
+        }
+        else {
+            // if the user did add "storeName" tag to URL as a filter
+            const stores = yield storeRepository.findBy({
+                store_name: (0, typeorm_1.ILike)(`%${requested_store_name}%`),
+            });
+            const storeInfo = stores.map((store) => {
+                return {
+                    storeName: store.store_name,
+                    address: store.address,
+                    distance: (0, distance_1.default)(user_location, store.location.coordinates),
+                };
+            });
+            res.status(200).json(storeInfo);
+        }
     }
     catch (err) {
         res.status(500).send(err);
@@ -118,6 +138,7 @@ const loginStore = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         }
         // Create the JWT to provide store with authentication.
         const payload = {
+            type: "store",
             id: store.store_id,
         };
         const token = jsonwebtoken_1.default.sign(payload, ((process.env.PRODUCTION == "true"

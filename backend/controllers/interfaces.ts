@@ -45,6 +45,7 @@ export interface StoreErrors {
   email: string;
 }
 
+
 export interface CleanCartInfo {
   quantity: number;
   inventoryItemId: number;
@@ -57,4 +58,10 @@ export interface CartItemInfo {
   quantity: number;
   price: number;
   inventory_item: number;
+
+export interface ItemInfo {
+  itemId: number;
+  name: string;
+  price: number;
+  quantity: number;
 }
