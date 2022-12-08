@@ -51,7 +51,7 @@ export interface CleanCartInfo {
 }
 
 export interface CartItemInfo {
-  cart_id: number;
+  cart_item_id: number;
   name: string;
   store: string;
   quantity: number;

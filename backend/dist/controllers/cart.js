@@ -45,7 +45,6 @@ const addCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         }
         // Clean the fields of the item's data, we only need quantity rn but may need more later
         const cartItem = cleanFields(req.body);
-        console.log("c2");
         const inventoryItem = yield inventoryRepository.findOneBy({
             item_id: (0, typeorm_1.Equal)(cartItem.inventoryItemId),
         });
@@ -64,7 +63,7 @@ const addCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         //   newCartItem.cart_item.price.valueOf() *
         //   newCartItem.cart_item.quantity.valueOf();
         // Send back 201 upon successful creation
-        res.status(201).json(4);
+        res.status(201).json("New item successfully created");
     }
     catch (err) {
         res.status(500).send(err);
@@ -92,16 +91,14 @@ const removeCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function*
         }
         // If the request is to clear all of the items, then do so
         if (clearAll) {
-            // find the user and clear all the items belonging to that user
-            const user = yield userRepository.findOneBy({ user_id: userId });
-            console.log(user);
             yield cartRepository.delete({ customer: { user_id: userId } });
-            return res.status(404).json(0);
+            return res.status(200).json("The cart was fully cleared");
         }
         // Get the item that the store manager is trying to delete.
         const cartItemId = parseInt(req.params.cartItemId);
         // check that the item belongs to the user
-        if (!isValidItem(cartItemId, userId)) {
+        const isValid = yield isValidItem(cartItemId, userId);
+        if (!isValid) {
             return res
                 .status(404)
                 .json("Cart item does not exist or does not belong to the correct user");
@@ -111,11 +108,9 @@ const removeCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function*
         // var price: number = (<any>req).price;
         // total = total - price;
         yield cartRepository.delete(cartItemId);
-        console.log("c3");
-        res.status(200).json(4);
+        res.status(200).json("The item was sucessfully deleted");
     }
     catch (err) {
-        console.log(err);
         res.status(500).send(err);
     }
 });
@@ -140,7 +135,8 @@ const updateCartQuantity = (req, res) => __awaiter(void 0, void 0, void 0, funct
         }
         const cartItemId = parseInt(req.params.cartItemId);
         // Make sure that this item belongs to the store
-        if (!isValidItem(cartItemId, userId)) {
+        const isValid = yield isValidItem(cartItemId, userId);
+        if (!isValid) {
             return res
                 .status(404)
                 .json("Cart item does not exist or does not belong to the correct user");
@@ -156,7 +152,7 @@ const updateCartQuantity = (req, res) => __awaiter(void 0, void 0, void 0, funct
         // var price: number = (<any>req).price;
         // var difference = (<any>req).oldQuantity - (<any>req).newQuantity;
         // total += difference * price;
-        res.status(200).json(4);
+        res.status(200).json("The item was updated successfully");
     }
     catch (err) {
         res.status(500).send(err);
@@ -201,7 +197,7 @@ const listCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         const cartInfo = cartItems.map((item) => {
             total += item.quantity.valueOf() * item.cart_item.price.valueOf();
             return {
-                cart_id: item.item_id.valueOf(),
+                cart_item_id: item.item_id.valueOf(),
                 name: item.cart_item.item_name,
                 quantity: item.quantity.valueOf(),
                 price: item.cart_item.price.valueOf(),
@@ -213,7 +209,6 @@ const listCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         res.status(200).json(cartInfo);
     }
     catch (err) {
-        console.log(err);
         res.status(500).send(err);
     }
 });
@@ -235,10 +230,11 @@ const isValidItem = (cartItemId, userId) => __awaiter(void 0, void 0, void 0, fu
             item_id: (0, typeorm_1.Equal)(Number(cartItemId)), // Syntax for querying for an item based on elements of embedded entities/FK relations
         },
     });
-    if (!cartItem) {
+    if (cartItem.length === 0) {
         return false;
     }
-    if (((_a = cartItem[0]) === null || _a === void 0 ? void 0 : _a.customer.user_id) != userId) {
+    if (((_a = cartItem[0]) === null || _a === void 0 ? void 0 : _a.customer.user_id) !== userId) {
+        console.log("here");
         return false;
     }
     return true;

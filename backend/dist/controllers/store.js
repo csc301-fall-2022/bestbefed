@@ -77,12 +77,9 @@ exports.createStore = createStore;
  */
 const fetchStores = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const requested_store_name = req.query.storeName;
         const user_location = req.body.location;
         // get the stores from database
         const stores = yield storeRepository.find();
-        const st = stores[0];
-        console.log(stores[0].location.coordinates);
         const storeInfo = stores.map((store) => {
             return {
                 storeName: store.store_name,

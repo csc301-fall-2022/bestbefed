@@ -12,12 +12,12 @@ const userRepository = AppDataSource.getRepository(User);
 const inventoryRepository = AppDataSource.getRepository(Inventory);
 
 /**
- * Handles POST store/ and attempts to create new Store in database.
+ * Handles GET user/items and attempts to get all the items in the databse for a specified user
  *
  * @param {Request}  req   Express.js object that contains all data pertaining to the POST request.
  * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
  *
- * @return {null}          Simply sends response back to client to notify of success or failure.
+ * @return {string}          Simply sends response back to client to notify if success or specifies the error
  */
 export const addCartItem = async (req: Request, res: Response) => {
   try {
@@ -54,6 +54,7 @@ export const addCartItem = async (req: Request, res: Response) => {
     newCartItem.added_date = new Date();
     newCartItem.cart_item = inventoryItem;
     await cartRepository.save(newCartItem);
+
     // re-calculate the total for the cart
     // var total: number = (<any>req).total;
     // total +=
@@ -61,19 +62,19 @@ export const addCartItem = async (req: Request, res: Response) => {
     //   newCartItem.cart_item.quantity.valueOf();
 
     // Send back 201 upon successful creation
-    res.status(201).json(4);
+    res.status(201).json("New item successfully created");
   } catch (err) {
     res.status(500).send(err);
   }
 };
 
 /**
- * Handles POST store/ and attempts to create new Store in database.
+ * Handles POST user/items and attempts to add an item to the database for the users cart.
  *
  * @param {Request}  req   Express.js object that contains all data pertaining to the POST request.
  * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
  *
- * @return {null}          Simply sends response back to client to notify of success or failure.
+ * @return {null}          Simply sends response back to client to notify if success or specifies the error
  */
 export const removeCartItem = async (req: Request, res: Response) => {
   try {
@@ -89,14 +90,15 @@ export const removeCartItem = async (req: Request, res: Response) => {
     // If the request is to clear all of the items, then do so
     if (clearAll) {
       await cartRepository.delete({ customer: { user_id: userId } });
-      return res.status(404).json(0);
+      return res.status(200).json("The cart was fully cleared");
     }
 
     // Get the item that the store manager is trying to delete.
     const cartItemId: number = parseInt(req.params.cartItemId);
 
     // check that the item belongs to the user
-    if (!isValidItem(cartItemId, userId)) {
+    const isValid = await isValidItem(cartItemId, userId);
+    if (!isValid) {
       return res
         .status(404)
         .json(
@@ -110,7 +112,7 @@ export const removeCartItem = async (req: Request, res: Response) => {
     // total = total - price;
 
     await cartRepository.delete(cartItemId);
-    res.status(200).json(4);
+    res.status(200).json("The item was sucessfully deleted");
   } catch (err) {
     res.status(500).send(err);
   }
@@ -122,7 +124,7 @@ export const removeCartItem = async (req: Request, res: Response) => {
  * @param {Request}  req   Express.js object that contains all data pertaining to the POST request.
  * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
  *
- * @return {null}          Simply sends response back to client to notify of success or failure.
+ * @return {null}          Simply sends response back to client to notify if success or specifies the error
  */
 export const updateCartQuantity = async (req: Request, res: Response) => {
   try {
@@ -136,7 +138,9 @@ export const updateCartQuantity = async (req: Request, res: Response) => {
     }
     const cartItemId: number = parseInt(req.params.cartItemId);
     // Make sure that this item belongs to the store
-    if (!isValidItem(cartItemId, userId)) {
+
+    const isValid = await isValidItem(cartItemId, userId);
+    if (!isValid) {
       return res
         .status(404)
         .json(
@@ -154,7 +158,7 @@ export const updateCartQuantity = async (req: Request, res: Response) => {
     // var price: number = (<any>req).price;
     // var difference = (<any>req).oldQuantity - (<any>req).newQuantity;
     // total += difference * price;
-    res.status(200).json(4);
+    res.status(200).json("The item was updated successfully");
   } catch (err) {
     res.status(500).send(err);
   }
@@ -166,7 +170,7 @@ export const updateCartQuantity = async (req: Request, res: Response) => {
  * @param {Request}  req   Express.js object that contains all data pertaining to the POST request.
  * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
  *
- * @return {null}          Simply sends response back to client to notify of success or failure.
+ * @return {null}          Simply sends response back to client to notify if success or specifies the error
  */
 export const listCartItem = async (req: Request, res: Response) => {
   try {
@@ -182,8 +186,8 @@ export const listCartItem = async (req: Request, res: Response) => {
       return res.status(400).json("User not specified");
     }
     var total: number = 0;
-    // Query for all the items in the cart for this user.
 
+    // Query for all the items in the cart for this user.
     const user = await userRepository.findOneBy({
       username: "testyt3",
     });
@@ -192,15 +196,16 @@ export const listCartItem = async (req: Request, res: Response) => {
       relations: ["customer", "cart_item", "cart_item.store"],
       where: {
         customer: {
-          user_id: user?.user_id, // Syntax for querying for an item based on elements of embedded entities/FK relations
+          user_id: user?.user_id,
         },
       },
     });
+
     // Convert returned CartItem objects to format expected by frontend.
     const cartInfo: any[] | null = cartItems.map((item) => {
       total += item.quantity.valueOf() * item.cart_item.price.valueOf();
       return <CartItemInfo>{
-        cart_id: item.item_id.valueOf(),
+        cart_item_id: item.item_id.valueOf(),
         name: item.cart_item.item_name,
         quantity: item.quantity.valueOf(),
         price: item.cart_item.price.valueOf(),
@@ -228,24 +233,25 @@ const isValidItem = async (cartItemId: number, userId: string) => {
   const cartItem = await cartRepository.find({
     relations: ["customer"],
     where: {
-      item_id: Equal(Number(cartItemId)), // Syntax for querying for an item based on elements of embedded entities/FK relations
+      item_id: Equal(Number(cartItemId)),
     },
   });
-  if (!cartItem) {
+  if (cartItem.length === 0) {
     return false;
   }
-  if (cartItem[0]?.customer.user_id != userId) {
+  if (cartItem[0]?.customer.user_id !== userId) {
+    console.log("here");
     return false;
   }
   return true;
 };
 
 /**
- * HELPER: sanitizes all the fields in an object of type ItemInfo to prepare it for creation in Database.
+ * HELPER: sanitizes all the fields in an object of type CleanCartInfo to prepare it for creation in Database.
  *
- * @param {ItemInfo} itemData       Object containing unsanitized data needed for the creation of an InventoryItem entity.
+ * @param {ItemInfo} itemData       Object containing unsanitized data
  *
- * @return {ItemInfo}               A sanitized ItemInfo object.
+ * @return {ItemInfo}               A sanitized CleanCartInfo object.
  */
 const cleanFields = (cartItemData: CleanCartInfo) => {
   if ("quantity" in cartItemData) {
