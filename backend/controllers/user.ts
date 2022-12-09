@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import validator from "validator";
 
 import { AppDataSource } from "../data-source";
+import { UserErrors, UserRequest } from "./interfaces";
 import { PaymentInfo, UserErrors, UserRequest } from "./interfaces";
 import { Order } from "../entity/Order";
 import { InventoryItem } from "../entity/InventoryItem";
@@ -123,7 +124,7 @@ const constructUserRequest = async (requestBody: Request) => {
     },
   };
   return userData;
-}
+};
 
 /**
  * Handles POST user/ and attempts to create new User in database.
