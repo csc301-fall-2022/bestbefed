@@ -8,6 +8,7 @@ import {
   } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import isEmail from "validator/lib/isEmail";
+import {Link} from 'react-router-dom'
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
 const FN_REGEX = /^[A-z][A-z ]{0,23}$/;
 const LN_REGEX = /^[A-z][A-z ]{0,23}$/;
@@ -19,10 +20,76 @@ const expREGEX = /^[0-9]{2}[/][0-9]{2}$/;
 const cvvREGEX = /^[0-9]{3}$/;
 
 const PROFILE_URL = "/user/profile/";
+
+
+
 function Profile() {
+
+  //////////////////////////// interfaces
 
     interface LooseObject {
         [key: string]: any
+    }
+    
+    interface ProfileInfo {
+      firstName?: string;
+      lastName?: string;
+      email?: string;
+      password?: string;
+      creditCard?: string;
+      cvv?: string;
+      exp?: string;
+    }
+  ////////////////////////////////////////////
+
+   // step 2: prefill "form" data with axios results
+   const [password, setPassword] = useState("");
+   const [validPassword, setValidPassword] = useState(false);
+   const [focusedOnPassword, setPasswordFocus] = useState(false);
+
+   const [mpassword, setMPassword] = useState("");
+   const [validMPassword, setValidMPassword] = useState(false);
+   const [focusedOnMPassword, setMPasswordFocus] = useState(false);
+
+   const [firstname, setFirstname] = useState("");
+   const [validFirstname, setValidFirstname] = useState(false);
+   const [focusedOnFirstname, setFirstnameFocus] = useState(false);
+ 
+   const [lastname, setLastname] = useState("");
+   const [validLastname, setValidLastname] = useState(false);
+   const [focusedOnLastname, setLastnameFocus] = useState(false);
+ 
+   const [email, setEmail] = useState("");
+   const [validEmail, setValidEmail] = useState(false);
+   const [focusedOnEmail, setEmailFocus] = useState(false);
+ 
+   const [creditcard, setCc] = useState("");
+   const [validCc, setValidCc] = useState(false);
+   const [focusedOnCc, setCcFocus] = useState(false);
+ 
+   const [exp, setExp] = useState("");
+   const [validExp, setValidExp] = useState(false);
+   const [focusedOnExp, setExpFocus] = useState(false);
+ 
+   const [cvv, setCvv] = useState("");
+   const [validCvv, setValidCvv] = useState(false);
+   const [focusedOnCvv, setCvvFocus] = useState(false);
+
+    // for initalizing and setting fetching user data
+    function userData(data: ProfileInfo){
+      if (data.firstName){
+        setFirstname(data.firstName);
+      }
+      if (data.lastName){
+        setLastname(data.lastName)
+      }
+      if (data.email){
+        setEmail(data.email)
+      }
+      if (data.creditCard){
+        const x = "X";
+        setCc(data.creditCard.slice(0,4) + `${x.repeat(data.creditCard.length - 4)}`);
+      }
     }
 
     const firstRender = () => {
@@ -36,13 +103,15 @@ function Profile() {
                     }
                 )
                 // on succesful request, set data
-                setUserData(response.data)
+                userData(response.data)
             } catch (err: any) {
                 // unsuccessful, update when api becomes available
                 if (!err?.response) {
                     setErrorMessage("No Server Response, possible maintanance at work");
                   } 
-                  // update when api is available
+                else {
+                  setErrorMessage("Update unavailable")
+                }
             }
         }
 
@@ -65,8 +134,6 @@ function Profile() {
         return isValid;
       }
 
-    // for initalizing and setting fetching user data
-    const [userdata, setUserData] = useState<any>({});
 
     // for backend and submission validation
     const [errormessage, setErrorMessage] = useState("");
@@ -78,40 +145,6 @@ function Profile() {
 
     // step 1: fetch user data using axios get call
     useEffect(firstRender, [])
-
-
-    // step 2: prefill "form" data with axios results
-    const [password, setPassword] = useState("");
-    const [validPassword, setValidPassword] = useState(false);
-    const [focusedOnPassword, setPasswordFocus] = useState(false);
-
-    const [mpassword, setMPassword] = useState("");
-    const [validMPassword, setValidMPassword] = useState(false);
-    const [focusedOnMPassword, setMPasswordFocus] = useState(false);
-
-    const [firstname, setFirstname] = useState(userdata.firstname || "");
-    const [validFirstname, setValidFirstname] = useState(false);
-    const [focusedOnFirstname, setFirstnameFocus] = useState(false);
-  
-    const [lastname, setLastname] = useState(userdata.lastname || "");
-    const [validLastname, setValidLastname] = useState(false);
-    const [focusedOnLastname, setLastnameFocus] = useState(false);
-  
-    const [email, setEmail] = useState(userdata.email || "");
-    const [validEmail, setValidEmail] = useState(false);
-    const [focusedOnEmail, setEmailFocus] = useState(false);
-  
-    const [creditcard, setCc] = useState(userdata.creditcard || "");
-    const [validCc, setValidCc] = useState(false);
-    const [focusedOnCc, setCcFocus] = useState(false);
-  
-    const [exp, setExp] = useState(userdata.exp || "");
-    const [validExp, setValidExp] = useState(false);
-    const [focusedOnExp, setExpFocus] = useState(false);
-  
-    const [cvv, setCvv] = useState(userdata.cvv || "");
-    const [validCvv, setValidCvv] = useState(false);
-    const [focusedOnCvv, setCvvFocus] = useState(false);
 
     // step 3: change and validate user data in "form"
       useEffect(() => {
@@ -166,6 +199,9 @@ function Profile() {
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
+        if (!password && !mpassword && !email && !firstname && !lastname && !creditcard && !cvv && !exp){
+          return;
+        }
 
         // button hacking check
         const v2 = PWD_REGEX.test(password);
@@ -206,6 +242,8 @@ function Profile() {
             if (exp){
                 request_data.exp = exp;
             }
+
+            console.log(request_data)
             await axios.patch(PROFILE_URL, JSON.stringify(request_data), {
                 headers: { "Content-Type": "application/json" },
                 withCredentials: true,
@@ -217,7 +255,9 @@ function Profile() {
             if (!err?.response) {
                 setErrorMessage("No Server Response, possible maintanance at work");
               } 
-              // update when api is available
+            else {
+              setErrorMessage("Update failed")
+            }
             
         }
     }
@@ -229,6 +269,9 @@ function Profile() {
           <section>
             <p ref={errRef} className={errormessage ? "errmsg" : "offscreen"}>
               {errormessage}
+            </p>
+            <p className={succmessage ? "succmsg" : "offscreen"}>
+              {succmessage}
             </p>
             <h1>Update Profile </h1>
 
@@ -392,7 +435,7 @@ function Profile() {
                 "someone@example.com"
               </p>
               <label htmlFor="creditcard">
-                Credit Card #: <i>(optional)</i>
+                Credit Card #: 
                 <FontAwesomeIcon
                   icon={faCarrot}
                   className={validCc ? "valid" : "hide"}
@@ -421,7 +464,7 @@ function Profile() {
                 Invalid Credit Card Number.
               </p>
               <label htmlFor="exp">
-                Expiry Date: <i>(optional)</i>
+                Expiry Date:
                 <FontAwesomeIcon
                   icon={faCarrot}
                   className={validExp ? "valid" : "hide"}
@@ -450,7 +493,7 @@ function Profile() {
                 Invalid Date. Example: "01/25"
               </p>
               <label htmlFor="cvv">
-                CVV: <i>(optional)</i>
+                CVV:
                 <FontAwesomeIcon
                   icon={faCarrot}
                   className={validCvv ? "valid" : "hide"}
@@ -490,10 +533,12 @@ function Profile() {
                 {" "}
                 Update Profile{" "}
               </button>
+              <br />
 
-              <p ref={sucRef} className={succmessage ? "succmsg" : "offscreen"}>
-              {succmessage}
-            </p>
+              <span className="line">
+                <Link to="/">Return Home</Link>
+              </span>
+
             </form>
           </section>
         </div>
