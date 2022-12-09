@@ -4,9 +4,10 @@ import jwt from "jsonwebtoken";
 import validator from "validator";
 
 import { AppDataSource } from "../data-source";
+import { UserErrors, UserRequest } from "./interfaces";
 import { PaymentInfo, UserErrors, UserRequest } from "./interfaces";
 import { Order } from "../entity/Order";
-import { Inventory } from "../entity/Inventory";
+import { InventoryItem } from "../entity/InventoryItem";
 import { User } from "../entity/User";
 // import { DataSource } from "typeorm";
 
@@ -123,7 +124,7 @@ const constructUserRequest = async (requestBody: Request) => {
     },
   };
   return userData;
-}
+};
 
 /**
  * Handles POST user/ and attempts to create new User in database.
@@ -198,6 +199,7 @@ export const loginUser = async (req: Request, res: Response) => {
 
     // Create the JWT to provide user with authentication.
     const payload = {
+      type: "user",
       id: user.user_id,
     };
     const token = jwt.sign(

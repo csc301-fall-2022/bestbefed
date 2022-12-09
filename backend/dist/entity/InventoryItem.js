@@ -9,33 +9,32 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CartItem = void 0;
+exports.InventoryItem = void 0;
 const typeorm_1 = require("typeorm");
-const InventoryItem_1 = require("./InventoryItem");
-const User_1 = require("./User");
-let CartItem = class CartItem extends typeorm_1.BaseEntity {
+const Store_1 = require("./Store");
+let InventoryItem = class InventoryItem extends typeorm_1.BaseEntity {
 };
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
-], CartItem.prototype, "item_id", void 0);
+], InventoryItem.prototype, "item_id", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => Store_1.Store, (store) => store.store_id),
+    __metadata("design:type", Store_1.Store)
+], InventoryItem.prototype, "store", void 0);
+__decorate([
+    (0, typeorm_1.Column)("varchar", { length: 255 }),
+    __metadata("design:type", String)
+], InventoryItem.prototype, "item_name", void 0);
+__decorate([
+    (0, typeorm_1.Column)("float"),
+    __metadata("design:type", Number)
+], InventoryItem.prototype, "price", void 0);
 __decorate([
     (0, typeorm_1.Column)("int"),
     __metadata("design:type", Number)
-], CartItem.prototype, "quantity", void 0);
-__decorate([
-    (0, typeorm_1.Column)("date"),
-    __metadata("design:type", Date)
-], CartItem.prototype, "added_date", void 0);
-__decorate([
-    (0, typeorm_1.ManyToOne)(() => InventoryItem_1.InventoryItem, (inventoryItem) => inventoryItem.item_id),
-    __metadata("design:type", InventoryItem_1.InventoryItem)
-], CartItem.prototype, "cart_item", void 0);
-__decorate([
-    (0, typeorm_1.ManyToOne)(() => User_1.User, (user) => user.user_id),
-    __metadata("design:type", User_1.User)
-], CartItem.prototype, "customer", void 0);
-CartItem = __decorate([
+], InventoryItem.prototype, "quantity", void 0);
+InventoryItem = __decorate([
     (0, typeorm_1.Entity)()
-], CartItem);
-exports.CartItem = CartItem;
+], InventoryItem);
+exports.InventoryItem = InventoryItem;

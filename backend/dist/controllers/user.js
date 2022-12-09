@@ -184,6 +184,7 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
         // Create the JWT to provide user with authentication.
         const payload = {
+            type: "user",
             id: user.user_id,
         };
         const token = jsonwebtoken_1.default.sign(payload, ((process.env.PRODUCTION == "true"
