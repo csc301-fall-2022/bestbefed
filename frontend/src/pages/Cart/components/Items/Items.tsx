@@ -9,8 +9,8 @@ const Items = ({
   minusQuant,
 }: {
   items: {
-    id: number;
-    itemName: string;
+    cart_item_id: number;
+    name: string;
     price: number;
     store: string;
     quantity: number;
@@ -24,16 +24,16 @@ const Items = ({
     <>
       {items.map((item) => {
         return (
-          <div className="cart-item" key={item.id}>
+          <div className="cart-item" key={item.cart_item_id}>
             <div className="image-box">
               <img
                 src={item.imageUrl}
-                alt={item.itemName}
+                alt={item.name}
                 style={{ height: "200px", width: "200px" }}
               />
             </div>
             <div className="item-info">
-              <h1 className="item-name">{item.itemName}</h1>
+              <h1 className="item-name">{item.name}</h1>
               <h3 className="item-price">${item.price}</h3>
               <h3 className="item-store">Store: {item.store}</h3>
             </div>
@@ -42,7 +42,7 @@ const Items = ({
               <Button
                 variant="secondary"
                 className="counter-btn"
-                onClick={() => minusQuant(item.id)}
+                onClick={() => minusQuant(item.cart_item_id)}
               >
                 -
               </Button>
@@ -50,7 +50,7 @@ const Items = ({
               <Button
                 variant="secondary"
                 className="counter-btn"
-                onClick={() => addQuant(item.id)}
+                onClick={() => addQuant(item.cart_item_id)}
               >
                 +
               </Button>
@@ -62,7 +62,10 @@ const Items = ({
                   (item.quantity * item.price + Number.EPSILON) * 100
                 ) / 100}
               </div>
-              <Button variant="danger" onClick={() => onDelete(item.id)}>
+              <Button
+                variant="danger"
+                onClick={() => onDelete(item.cart_item_id)}
+              >
                 Delete
               </Button>
             </div>
