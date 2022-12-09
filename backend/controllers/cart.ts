@@ -3,13 +3,13 @@ import { AppDataSource } from "../data-source";
 import { CartItemInfo, CleanCartInfo } from "./interfaces";
 import { CartItem } from "../entity/CartItem";
 import { User } from "../entity/User";
-import { Inventory } from "../entity/Inventory";
+import { InventoryItem } from "../entity/InventoryItem";
 import { Equal } from "typeorm";
 
 // Create multiple repositories that allows us to use TypeORM to interact w/ entities in DB.
 const cartRepository = AppDataSource.getRepository(CartItem);
 const userRepository = AppDataSource.getRepository(User);
-const inventoryRepository = AppDataSource.getRepository(Inventory);
+const inventoryRepository = AppDataSource.getRepository(InventoryItem);
 
 /**
  * Handles POST user/items and attempts to add an item to the user's cart
@@ -39,7 +39,7 @@ export const addCartItem = async (req: Request, res: Response) => {
 
     // Clean the fields of the item's data, we only need quantity rn but may need more later
     const cartItem: CleanCartInfo = cleanFields(req.body);
-    const inventoryItem: Inventory | null = await inventoryRepository.findOneBy(
+    const inventoryItem: InventoryItem | null = await inventoryRepository.findOneBy(
       {
         item_id: Equal(cartItem.inventoryItemId),
       }
