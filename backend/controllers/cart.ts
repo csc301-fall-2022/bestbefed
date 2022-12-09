@@ -3,13 +3,13 @@ import { AppDataSource } from "../data-source";
 import { CartItemInfo, CleanCartInfo } from "./interfaces";
 import { CartItem } from "../entity/CartItem";
 import { User } from "../entity/User";
-import { Inventory } from "../entity/Inventory";
+import { InventoryItem } from "../entity/InventoryItem";
 import { Equal } from "typeorm";
 
 // Create multiple repositories that allows us to use TypeORM to interact w/ entities in DB.
 const cartRepository = AppDataSource.getRepository(CartItem);
 const userRepository = AppDataSource.getRepository(User);
-const inventoryRepository = AppDataSource.getRepository(Inventory);
+const inventoryRepository = AppDataSource.getRepository(InventoryItem);
 
 /**
  * Handles POST user/items and attempts to add an item to the user's cart
@@ -39,11 +39,10 @@ export const addCartItem = async (req: Request, res: Response) => {
 
     // Clean the fields of the item's data, we only need quantity rn but may need more later
     const cartItem: CleanCartInfo = cleanFields(req.body);
-    const inventoryItem: Inventory | null = await inventoryRepository.findOneBy(
-      {
+    const inventoryItem: InventoryItem | null =
+      await inventoryRepository.findOneBy({
         item_id: Equal(cartItem.inventoryItemId),
-      }
-    );
+      });
     if (!inventoryItem) {
       return res.status(404).json("The item was not found in inventory");
     }
@@ -84,9 +83,10 @@ export const removeCartItem = async (req: Request, res: Response) => {
     //let userId: string = (<any>req).user.id;
     let userId = (<any>req).body.user;
     if (!userId) {
+      // TODO fix the hardcoded user id
       // user ID not specified in URL query params
       // Grab the user's uuid from the payload of the token held by the cookie
-      userId = (<any>req.body).user;
+      userId = "f32b4260-4a87-41af-978e-44b19bc332c3";
     }
     // If the request is to clear all of the items, then do so
     if (clearAll) {
@@ -133,9 +133,10 @@ export const updateCartQuantity = async (req: Request, res: Response) => {
     //let userId: string = (<any>req).user.id;
     let userId = (<any>req).body.user;
     if (!userId) {
+      // TODO fix the hardcoded user id
       // user ID not specified in URL query params
       // Grab the user's uuid from the payload of the token held by the cookie
-      userId = (<any>req.body).user;
+      userId = "f32b4260-4a87-41af-978e-44b19bc332c3";
     }
     const cartItemId: number = parseInt(req.params.cartItemId);
     // Make sure that this item belongs to the store
@@ -179,9 +180,10 @@ export const listCartItem = async (req: Request, res: Response) => {
     //let userId: string = (<any>req).user.id;
     let userId: string = (<any>req).body.user;
     if (!userId) {
+      // TODO fix the hardcoded user id
       // user ID not specified in URL query params
       // Grab the user's uuid from the payload of the token held by the cookie
-      userId = (<any>req).body.user;
+      userId = "f32b4260-4a87-41af-978e-44b19bc332c3";
     }
     if (!userId) {
       return res.status(400).json("User not specified");
