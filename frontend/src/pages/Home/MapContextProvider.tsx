@@ -1,5 +1,5 @@
 import mapboxgl, { LngLat } from "mapbox-gl";
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import axios from "../../api/axios";
 
 export interface IMapContext {
@@ -29,7 +29,7 @@ function MapContextProvider({ children }: { children: ReactNode }) {
   const [curFeature, setCurFeature] = useState<GeoJSON.Feature | null>(null);
   const [query, setQuery] = useState("");
 
-  const getStores = async () => {
+  const getStores = () => {
     let features: GeoJSON.Feature[] = [];
     axios
       .get(POST_STORE_URL, {

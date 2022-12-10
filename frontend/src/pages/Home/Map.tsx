@@ -39,7 +39,6 @@ function Map() {
 
   // Create map and add data
   useEffect(() => {
-    getStores();
     if (map.current) return;
     map.current = new mapboxgl.Map({
       container: mapContainer.current as HTMLDivElement,
@@ -55,6 +54,10 @@ function Map() {
         top: 0,
         bottom: 0,
       });
+      let f = async () => {
+        await getStores();
+      };
+      f();
       map.current?.addSource("stores", { type: "geojson", data: stores });
       map.current?.addLayer({
         id: "stores",
@@ -102,7 +105,7 @@ function Map() {
   // Update map center and nearby stores any time lng/lat changes
   useEffect(() => {
     if (map.current) {
-      map.current.flyTo({ center: mapLocation, zoom: 13 });
+      map.current.flyTo({ center: mapLocation, zoom: 14 });
       droppin.remove();
       droppin.setLngLat(mapLocation);
       droppin.addTo(map.current);
