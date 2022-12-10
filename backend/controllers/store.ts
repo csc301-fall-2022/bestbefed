@@ -27,6 +27,7 @@ export const createStore = async (req: Request, res: Response) => {
       password: (<any>req.body).password.trim(),
       email: (<any>req.body).email.trim(),
       address: (<any>req.body).address.trim(),
+      type: (<any>req.body).type?.trim().toLowerCase() || "",
     };
     const store = await cleanStore(storeData);
 
@@ -46,9 +47,7 @@ export const createStore = async (req: Request, res: Response) => {
         return res.json();
       })
       .then((data) => {
-        console.log(data);
         let featureCollection = data as unknown as FeatureCollection;
-        console.log(featureCollection);
         if (featureCollection.features.length === 0) {
           res.status(400).json("Specified address does not exist");
           return;
@@ -74,6 +73,7 @@ export const createStore = async (req: Request, res: Response) => {
     newStore.password = hashedPass;
     newStore.email_verified = false;
     newStore.location = location;
+    newStore.type = store.type;
 
     await storeRepository.save(newStore);
 
@@ -131,10 +131,12 @@ export const fetchStores = async (req: Request, res: Response) => {
           id: store.store_id,
           storeName: store.store_name,
           address: store.address,
+          location: store.location,
           // If no user location provided, we don't set store distance
           ...(user_coords && {
             distance: distance(user_coords, store.location.coordinates),
           }),
+          type: store.type || undefined,
         };
       });
     } else {
@@ -147,10 +149,12 @@ export const fetchStores = async (req: Request, res: Response) => {
           id: store.store_id,
           storeName: store.store_name,
           address: store.address,
+          location: store.location,
           // If no user location provided, we don't set store distance
           ...(user_coords && {
             distance: distance(user_coords, store.location.coordinates),
           }),
+          type: store.type || undefined,
         };
       });
     }
@@ -257,6 +261,7 @@ const cleanStore = async (newStore: StoreRequest) => {
     password: "",
     email: "",
     address: "",
+    type: "",
   };
 
   // Check if a store with this name already exists in the database
