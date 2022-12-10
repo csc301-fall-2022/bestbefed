@@ -1,5 +1,11 @@
 import React from "react";
-import { Route, Routes, BrowserRouter, Navigate } from "react-router-dom";
+import {
+  Route,
+  Routes,
+  BrowserRouter,
+  Navigate,
+  Outlet,
+} from "react-router-dom";
 import { AuthProvider, RequireAuth } from "react-auth-kit";
 import { Login, Logout, Register } from "./pages/AccountPages";
 import Cart from "./pages/Cart/Cart";
@@ -10,39 +16,26 @@ function App() {
   return (
     <AuthProvider
       authType={"cookie"}
-      authName={"_auth"}
+      authName={"auth_token"}
       cookieDomain={window.location.hostname}
       cookieSecure={window.location.protocol === "https:"}
     >
       <BrowserRouter>
         <Routes>
           <Route
-            path="/"
             element={
               <RequireAuth loginPath="/login">
-                <Home />
+                <Outlet />
               </RequireAuth>
             }
-          />
+          >
+            <Route path="/" element={<Home />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/store/:id" element={<Storefront />} />
+          </Route>
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/logout" element={<Logout />} />
-          <Route
-            path="/cart"
-            element={
-              <RequireAuth loginPath="/login">
-                <Cart />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/store/:id"
-            element={
-              <RequireAuth loginPath="/login">
-                <Storefront />
-              </RequireAuth>
-            }
-          />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </BrowserRouter>
