@@ -13,6 +13,9 @@ router.patch("/items/:itemId", auth_1.isAuthenticated, inventory_1.updateInvento
 router.delete("/items/:itemId", auth_1.isAuthenticated, inventory_1.removeInventoryItem);
 router.post("/items", auth_1.isAuthenticated, inventory_1.addInventoryItem);
 router.get("/items", inventory_1.listInventory);
+// Store profile endpoints
+router.get("/profile", auth_1.isAuthenticated, store_1.getStoreProfile);
+router.patch("/profile", auth_1.isAuthenticated, store_1.updateStoreProfile);
 // Set up route handlers for all routes beginning with "/store"
 // Store creation and auth
 router.post("/login", store_1.loginStore);
