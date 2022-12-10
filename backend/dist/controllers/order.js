@@ -36,6 +36,8 @@ const createOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         // Attempt to get user ID from cookies
         //let userId: string = (<any>req).user.id;
         let userId = req.body.user;
+        console.log(req.body.user);
+        console.log(userId);
         if (!userId) {
             // user ID not specified in URL query params
             // Grab the user's uuid from the payload of the token held by the cookie
@@ -52,6 +54,7 @@ const createOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             order_date: today,
             customer: user.user_id // TODO: get current logged in User object
         };
+        return res.status(201).json("New order successfully created for " + user.username);
     }
     catch (err) {
         return res.status(500).send(err);

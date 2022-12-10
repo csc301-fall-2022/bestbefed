@@ -13,6 +13,7 @@ import { CartItem } from "../entity/CartItem";
 import { Order } from "../entity/Order";
 import { User } from "../entity/User";
 import { InventoryItem } from "../entity/InventoryItem";
+import { collapseTextChangeRangesAcrossMultipleVersions } from "typescript";
 
 var today = new Date();
 
@@ -37,6 +38,8 @@ export const createOrder = async (req: Request, res: Response) => {
         // Attempt to get user ID from cookies
         //let userId: string = (<any>req).user.id;
         let userId = (<any>req).body.user;
+        console.log((<any>req).body.user);
+        console.log(userId);
         if (!userId) {
             // user ID not specified in URL query params
             // Grab the user's uuid from the payload of the token held by the cookie
@@ -45,16 +48,18 @@ export const createOrder = async (req: Request, res: Response) => {
         const user: User | null = await userRepository.findOneBy({
             user_id: userId,
         });
+        
         if (!user) {
             return res.status(404).json("User not found");
         }
 
         // At this point, user should be the currently authenticated user.
-
         const orderData: OrderRequest = {
             order_date: today,
             customer: user.user_id // TODO: get current logged in User object
         };
+
+        return res.status(201).json("New order successfully created for " + user.username);
     } catch (err) {
         return res.status(500).send(err);
     }
