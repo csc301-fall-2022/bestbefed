@@ -19,7 +19,7 @@ const router = express.Router();
 router.patch("/items/:itemId", isAuthenticated, updateInventoryItem);
 router.delete("/items/:itemId", isAuthenticated, removeInventoryItem);
 router.post("/items", isAuthenticated, addInventoryItem);
-router.get("/items", listInventory);
+router.get("/items", isAuthenticated, listInventory);
 
 // Set up route handlers for all routes beginning with "/store"
 // Store creation and auth
