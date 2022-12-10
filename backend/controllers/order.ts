@@ -31,24 +31,21 @@ const orderRepository = AppDataSource.getRepository(Order);
  * @param {Request}  req   Express.js object that contains all data pertaining to the POST request.
  * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
  *
- * @return {string}          Simply sends response back to client to notify if success or specifies the error
+ * @return {string}        Simply sends response back to client to notify if success or specifies the error
  */
 export const createOrder = async (req: Request, res: Response) => {
+    console.log(document.cookie);
     try {
         // Attempt to get user ID from cookies
         //let userId: string = (<any>req).user.id;
-        let userId = (<any>req).body.user;
-        console.log((<any>req).body.user);
-        console.log(userId);
+        let userId = (<any>req).user.id;
+
         if (!userId) {
-            // user ID not specified in URL query params
-            // Grab the user's uuid from the payload of the token held by the cookie
-            userId = (<any>req.body).user;
+            return res.status(400).json("User not specified");
         }
         const user: User | null = await userRepository.findOneBy({
             user_id: userId,
         });
-        
         if (!user) {
             return res.status(404).json("User not found");
         }

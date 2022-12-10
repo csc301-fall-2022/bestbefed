@@ -29,19 +29,16 @@ const orderRepository = data_source_1.AppDataSource.getRepository(Order_1.Order)
  * @param {Request}  req   Express.js object that contains all data pertaining to the POST request.
  * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
  *
- * @return {string}          Simply sends response back to client to notify if success or specifies the error
+ * @return {string}        Simply sends response back to client to notify if success or specifies the error
  */
 const createOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(document.cookie);
     try {
         // Attempt to get user ID from cookies
         //let userId: string = (<any>req).user.id;
-        let userId = req.body.user;
-        console.log(req.body.user);
-        console.log(userId);
+        let userId = req.user.id;
         if (!userId) {
-            // user ID not specified in URL query params
-            // Grab the user's uuid from the payload of the token held by the cookie
-            userId = req.body.user;
+            return res.status(400).json("User not specified");
         }
         const user = yield userRepository.findOneBy({
             user_id: userId,
