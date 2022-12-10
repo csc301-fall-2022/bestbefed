@@ -1,7 +1,7 @@
-import React from "react";
 import { useRef } from "react";
 import { Button } from "react-bootstrap";
 import "./style.css";
+import axios from "../../api/axios";
 
 function StorefrontItem({
   name,
@@ -16,11 +16,18 @@ function StorefrontItem({
   price: number;
   max_quantity: number;
 }) {
+  const ADD_CART_ITEM_URL = "/user/items";
   let quantity = useRef<HTMLInputElement>(null);
 
-  function handleAdd() {
-    // TODO: Implement adding to cart
-    return;
+  async function handleAdd() {
+    const request_data = {
+      inventoryItemId: id,
+      quantity: Number(quantity.current?.value).valueOf(),
+    };
+    await axios.post(ADD_CART_ITEM_URL, JSON.stringify(request_data), {
+      headers: { "Content-Type": "application/json" },
+      withCredentials: true,
+    });
   }
 
   return (
@@ -58,7 +65,11 @@ function StorefrontItem({
           min="1"
           max={max_quantity}
         ></input>
-        <Button className="add-item-to-cart mt-0 rounded-5" variant="dark">
+        <Button
+          onClick={handleAdd}
+          className="add-item-to-cart mt-0 rounded-5"
+          variant="dark"
+        >
           Add +
         </Button>
       </div>

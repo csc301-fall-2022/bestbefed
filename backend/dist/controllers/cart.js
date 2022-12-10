@@ -31,11 +31,9 @@ const addCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     try {
         // Attempt to get user ID from cookies
         //let userId: string = (<any>req).user.id;
-        let userId = req.body.user;
+        let userId = req.user.id;
         if (!userId) {
-            // user ID not specified in URL query params
-            // Grab the user's uuid from the payload of the token held by the cookie
-            userId = req.body.user;
+            return res.status(400).json("User not specified");
         }
         const user = yield userRepository.findOneBy({
             user_id: userId,
@@ -49,6 +47,7 @@ const addCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             item_id: (0, typeorm_1.Equal)(cartItem.inventoryItemId),
         });
         if (!inventoryItem) {
+            console.log("nod item");
             return res.status(404).json("The item was not found in inventory");
         }
         // creates the item and adds it to the database
@@ -84,11 +83,9 @@ const removeCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function*
         const clearAll = req.params.clearAll === "true";
         // Attempt to get user ID from cookies
         //let userId: string = (<any>req).user.id;
-        let userId = req.body.user;
+        let userId = req.user.id;
         if (!userId) {
-            // user ID not specified in URL query params
-            // Grab the user's uuid from the payload of the token held by the cookie
-            userId = req.body.user;
+            return res.status(400).json("User not specified");
         }
         // If the request is to clear all of the items, then do so
         if (clearAll) {
@@ -128,14 +125,12 @@ const updateCartQuantity = (req, res) => __awaiter(void 0, void 0, void 0, funct
     try {
         // Attempt to get user ID from cookies
         //let userId: string = (<any>req).user.id;
-        let userId = req.body.user;
-        if (!userId) {
-            // user ID not specified in URL query params
-            // Grab the user's uuid from the payload of the token held by the cookie
-            userId = req.body.user;
-        }
+        let userId = req.user.id;
         const cartItemId = parseInt(req.params.cartItemId);
         // Make sure that this item belongs to the store
+        if (!userId) {
+            return res.status(400).json("User not specified");
+        }
         const isValid = yield isValidItem(cartItemId, userId);
         if (!isValid) {
             return res
@@ -172,19 +167,14 @@ const listCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     try {
         // Attempt to get user ID from cookies
         //let userId: string = (<any>req).user.id;
-        let userId = req.body.user;
-        if (!userId) {
-            // user ID not specified in URL query params
-            // Grab the user's uuid from the payload of the token held by the cookie
-            userId = req.body.user;
-        }
+        let userId = req.user.id;
         if (!userId) {
             return res.status(400).json("User not specified");
         }
         var total = 0;
         // Query for all the items in the cart for this user.
         const user = yield userRepository.findOneBy({
-            username: "testyt3",
+            user_id: userId,
         });
         // find the items by the user
         const cartItems = yield cartRepository.find({
@@ -236,7 +226,6 @@ const isValidItem = (cartItemId, userId) => __awaiter(void 0, void 0, void 0, fu
         return false;
     }
     if (((_a = cartItem[0]) === null || _a === void 0 ? void 0 : _a.customer.user_id) !== userId) {
-        console.log("here");
         return false;
     }
     return true;
