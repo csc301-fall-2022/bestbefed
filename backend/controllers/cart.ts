@@ -42,7 +42,6 @@ export const addCartItem = async (req: Request, res: Response) => {
         item_id: Equal(cartItem.inventoryItemId),
       });
     if (!inventoryItem) {
-      console.log("nod item");
       return res.status(404).json("The item was not found in inventory");
     }
 
