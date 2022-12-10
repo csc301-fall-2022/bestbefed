@@ -81,7 +81,7 @@ export const listInventory = async (req: Request, res: Response) => {
     if (!storeId) {
       // Store ID not specified in URL query params
       // Grab the store's uuid from the payload of the token held by the cookie
-      storeId = (<any>req).store;
+      storeId = (<any>req).store?.id;
     }
     if (!storeId) {
       return res.status(400).json("Store not specified");
