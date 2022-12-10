@@ -4,6 +4,8 @@ import {
   loginStore,
   logoutStore,
   fetchStores,
+  getStoreProfile,
+  updateStoreProfile,
 } from "../controllers/store";
 import {
   listInventory,
@@ -20,6 +22,10 @@ router.patch("/items/:itemId", isAuthenticated, updateInventoryItem);
 router.delete("/items/:itemId", isAuthenticated, removeInventoryItem);
 router.post("/items", isAuthenticated, addInventoryItem);
 router.get("/items", listInventory);
+
+// Store profile endpoints
+router.get("/profile", isAuthenticated, getStoreProfile);
+router.patch("/profile", isAuthenticated, updateStoreProfile);
 
 // Set up route handlers for all routes beginning with "/store"
 // Store creation and auth

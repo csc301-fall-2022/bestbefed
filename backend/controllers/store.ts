@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import validator from "validator";
 import { AppDataSource } from "../data-source";
-import { StoreErrors, StoreRequest, StoreInfo } from "./interfaces";
+import { StoreErrors, StoreRequest, StoreInfo, StoreProfileInfo } from "./interfaces";
 import { Store } from "../entity/Store";
 import bcrypt from "bcryptjs";
 import { Point } from "geojson";
@@ -175,6 +175,77 @@ export const logoutStore = (req: Request, res: Response) => {
   res.clearCookie("access_token");
   res.status(200).send("Logged out!");
 };
+
+/**
+ * Handles GET request to /store/profile to provide data to prepopulate a store profile form on frontend.
+ *
+ * @param {Request}  req   Express.js object that contains all data pertaining to the GET request.
+ * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
+ *
+ * @return {StoreProfileInfo}          Sends back the fields of the store's profile data
+ */
+ export const getStoreProfile = async (req: Request, res: Response) => {
+  try {
+    // Fetch the respective store's data from the database
+    const storeId: string = (<any>req).store.id;
+    const store: Store | null = await storeRepository.findOneBy({
+      store_id: storeId,
+    });
+
+    const profileData: StoreProfileInfo = {
+      store_name: store?.store_name!,
+      password: store?.password!,
+      address: store?.address!,
+      email: store?.email!,
+    };
+
+    // Send store their profile data
+    res.status(200).json(profileData);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+}
+
+/**
+ * Handles PATCH request to /store/profile to update data for a store's profile
+ *
+ * @param {Request}  req   Express.js object that has a request body in the format of StoreProfileInfo (patch request)
+ * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
+ *
+ * @return {StoreProfileInfo}          Sends back an object of the store's newly updated data
+ */
+export const updateStoreProfile = async (req: Request, res: Response) => {
+  // TODO: Add validation for incoming data
+  try {
+    // Update the profile of the store that sent this request
+    const storeId: string = (<any>req).store.id;
+
+    // If the store changed their password, re-hash it before storing
+    if ((<StoreProfileInfo>req.body).password) {
+      const salt = bcrypt.genSaltSync(10);
+      const password: string = (<StoreProfileInfo>req.body).password!;
+      const hashedPass: string = bcrypt.hashSync(password, salt);
+      (<StoreProfileInfo>req.body).password = hashedPass;
+    }
+    await storeRepository.update(storeId, <StoreProfileInfo>req.body);
+
+    // TODO: Duplicate code seen in getStoreProfile - maybe refactor
+    // Send the store's newly updated data back to them
+    const store: Store | null = await storeRepository.findOneBy({
+      store_id: storeId,
+    }); 
+    const profileData: StoreProfileInfo = {
+      store_name: store?.store_name!,
+      password: store?.password!,
+      address: store?.address!,
+      email: store?.email!,
+    };
+
+    res.status(200).json(profileData);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+}
 
 // Helper functions
 const isStoreErrors = (obj: any) => {

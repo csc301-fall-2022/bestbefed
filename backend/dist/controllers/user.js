@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logoutUser = exports.loginUser = exports.createUser = void 0;
+exports.updateUserProfile = exports.getUserProfile = exports.logoutUser = exports.loginUser = exports.createUser = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const validator_1 = __importDefault(require("validator"));
@@ -233,3 +233,77 @@ const logoutUser = (req, res) => {
     res.status(200).send("Logged out!");
 };
 exports.logoutUser = logoutUser;
+/**
+ * Handles GET request to /user/profile to provide data to prepopulate a profile form on frontend.
+ *
+ * @param {Request}  req   Express.js object that contains all data pertaining to the GET request.
+ * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
+ *
+ * @return {ProfileInfo}          Sends back
+ */
+const getUserProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Fetch the respective user's data from the database
+        const userId = req.user.id;
+        const user = yield userRepository.findOneBy({
+            user_id: userId,
+        });
+        const profileData = {
+            firstName: user === null || user === void 0 ? void 0 : user.firstName,
+            lastName: user === null || user === void 0 ? void 0 : user.lastName,
+            email: user === null || user === void 0 ? void 0 : user.email,
+            password: user === null || user === void 0 ? void 0 : user.password,
+            creditCard: user === null || user === void 0 ? void 0 : user.payment_info.creditCard,
+            cvv: user === null || user === void 0 ? void 0 : user.payment_info.cvv,
+            exp: user === null || user === void 0 ? void 0 : user.payment_info.expiryDate,
+        };
+        // Send user their profile data
+        res.status(200).json(profileData);
+    }
+    catch (err) {
+        res.status(500).send(err);
+    }
+});
+exports.getUserProfile = getUserProfile;
+/**
+ * Handles PATCH request to /user/profile to update data for a user's profile
+ *
+ * @param {Request}  req   Express.js object that has a request body in the format of ProfileInfo (patch request)
+ * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
+ *
+ * @return {ProfileInfo}          Sends back an object of the user's newly updated data
+ */
+const updateUserProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // TODO: Add validation for incoming data
+    try {
+        // Update the profile of the user that sent this request
+        const userId = req.user.id;
+        // If the user changed their password, re-hash it before storing
+        if (req.body.password) {
+            const salt = bcryptjs_1.default.genSaltSync(10);
+            const password = req.body.password;
+            const hashedPass = bcryptjs_1.default.hashSync(password, salt);
+            req.body.password = hashedPass;
+        }
+        yield userRepository.update(userId, req.body);
+        // TODO: Duplicate code seen in getUserProfile - maybe refactor
+        // Send the user's newly updated data back to them
+        const user = yield userRepository.findOneBy({
+            user_id: userId,
+        });
+        const profileData = {
+            firstName: user === null || user === void 0 ? void 0 : user.firstName,
+            lastName: user === null || user === void 0 ? void 0 : user.lastName,
+            email: user === null || user === void 0 ? void 0 : user.email,
+            password: user === null || user === void 0 ? void 0 : user.password,
+            creditCard: user === null || user === void 0 ? void 0 : user.payment_info.creditCard,
+            cvv: user === null || user === void 0 ? void 0 : user.payment_info.cvv,
+            exp: user === null || user === void 0 ? void 0 : user.payment_info.expiryDate,
+        };
+        res.status(200).json(profileData);
+    }
+    catch (err) {
+        res.status(500).send(err);
+    }
+});
+exports.updateUserProfile = updateUserProfile;
