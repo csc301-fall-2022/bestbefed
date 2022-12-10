@@ -41,6 +41,9 @@ export class Store extends BaseEntity {
   @Column("text")
   address!: string;
 
+  @Column("text", { default: "" })
+  type!: string;
+
   @BeforeInsert()
   generateId() {
     this.store_id = uuidv4();
