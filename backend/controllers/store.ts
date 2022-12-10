@@ -4,7 +4,7 @@ import { AppDataSource } from "../data-source";
 import { StoreErrors, StoreRequest, StoreInfo } from "./interfaces";
 import { Store } from "../entity/Store";
 import bcrypt from "bcryptjs";
-import { Point } from "geojson";
+import { FeatureCollection, Point } from "geojson";
 import jwt from "jsonwebtoken";
 import distance from "@turf/distance";
 import { ILike } from "typeorm";
@@ -36,15 +36,37 @@ export const createStore = async (req: Request, res: Response) => {
       return res.status(400).send({ errors: store });
     }
 
+    // TODO: Use environment variable for Mapbox access token
+    let location = await fetch(
+      encodeURI(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${store.address}.json?country=CA&limit=1&access_token=pk.eyJ1IjoiMWl6YXJkbyIsImEiOiJjbGEzNGRxeTMwbmo4M3BtaHhieDR5MnBrIn0.SOAbn6BE5Qqm86_K5jmECw`
+      )
+    )
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        console.log(data);
+        let featureCollection = data as unknown as FeatureCollection;
+        console.log(featureCollection);
+        if (featureCollection.features.length === 0) {
+          res.status(400).json("Specified address does not exist");
+          return;
+        }
+        return featureCollection.features[0].geometry as Point;
+      })
+      .catch((err) => {
+        res.status(503).json(err);
+        return;
+      });
+
+    if (!location) return;
+
     // All store data was valid - store will now be created properly.
     const salt = bcrypt.genSaltSync(10);
     const hashedPass = bcrypt.hashSync(store.password, salt);
 
     const newStore: Store = new Store();
-    const location: Point = {
-      type: "Point",
-      coordinates: [125.6, 10.1],
-    };
     newStore.store_name = store.storeName;
     newStore.email = store.email;
     newStore.address = store.address;
@@ -58,7 +80,7 @@ export const createStore = async (req: Request, res: Response) => {
     // Send back 201 upon successful creation
     res.status(201).json("New store created.");
   } catch (err) {
-    res.status(500).send(err);
+    res.status(500).json(err);
   }
 };
 
@@ -72,7 +94,30 @@ export const createStore = async (req: Request, res: Response) => {
  */
 export const fetchStores = async (req: Request, res: Response) => {
   try {
-    const user_location: number[] = (<any>req.query).location;
+    // Get user location (if possible), and verify that it is properly formatted
+    const location = (<any>req.query).location;
+    let user_coords: [number, number];
+    if (location) {
+      try {
+        user_coords = JSON.parse(location);
+        if (!Array.isArray(user_coords)) throw TypeError;
+        if (user_coords.length !== 2) throw TypeError;
+        if (
+          typeof user_coords[0] !== "number" ||
+          typeof user_coords[1] !== "number"
+        )
+          throw TypeError;
+        if (
+          user_coords[0] < -180 ||
+          user_coords[0] > 180 ||
+          user_coords[1] < -90 ||
+          user_coords[1] > 90
+        )
+          throw TypeError;
+      } catch (err) {
+        return res.status(400).json("Location is badly formatted");
+      }
+    }
 
     // Takes the URL value tagged by "storeName"
     const requested_store_name: string = (<any>req.query).storeName;
@@ -84,7 +129,10 @@ export const fetchStores = async (req: Request, res: Response) => {
         return <StoreInfo>{
           storeName: store.store_name,
           address: store.address,
-          distance: distance(user_location, store.location.coordinates),
+          // If no user location provided, we don't set store distance
+          ...(user_coords && {
+            distance: distance(user_coords, store.location.coordinates),
+          }),
         };
       });
       res.status(200).json(storeInfo);
@@ -97,7 +145,10 @@ export const fetchStores = async (req: Request, res: Response) => {
         return <StoreInfo>{
           storeName: store.store_name,
           address: store.address,
-          distance: distance(user_location, store.location.coordinates),
+          // If no user location provided, we don't set store distance
+          ...(user_coords && {
+            distance: distance(user_coords, store.location.coordinates),
+          }),
         };
       });
       res.status(200).json(storeInfo);

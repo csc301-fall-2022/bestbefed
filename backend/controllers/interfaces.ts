@@ -33,7 +33,7 @@ export interface StoreRequest {
 
 export interface StoreInfo {
   storeName: string;
-  distance: number;
+  distance?: number;
   address: string;
 }
 
@@ -44,7 +44,6 @@ export interface StoreErrors {
   address: string;
   email: string;
 }
-
 
 export interface CleanCartInfo {
   quantity: number;
