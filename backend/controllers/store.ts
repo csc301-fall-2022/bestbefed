@@ -121,11 +121,12 @@ export const fetchStores = async (req: Request, res: Response) => {
 
     // Takes the URL value tagged by "storeName"
     const requested_store_name: string = (<any>req.query).storeName;
+    let storeInfo: StoreInfo[];
     // if the user did not add "storeName" tag to URL as a filter
     if (!requested_store_name) {
       // get the stores from database
       const stores: Store[] | null = await storeRepository.find();
-      const storeInfo: StoreInfo[] = stores.map((store) => {
+      storeInfo = stores.map((store) => {
         return <StoreInfo>{
           storeName: store.store_name,
           address: store.address,
@@ -135,13 +136,12 @@ export const fetchStores = async (req: Request, res: Response) => {
           }),
         };
       });
-      res.status(200).json(storeInfo);
     } else {
       // if the user did add "storeName" tag to URL as a filter
       const stores: Store[] = await storeRepository.findBy({
         store_name: ILike(`%${requested_store_name}%`),
       });
-      const storeInfo: StoreInfo[] = stores.map((store) => {
+      storeInfo = stores.map((store) => {
         return <StoreInfo>{
           storeName: store.store_name,
           address: store.address,
@@ -151,8 +151,15 @@ export const fetchStores = async (req: Request, res: Response) => {
           }),
         };
       });
-      res.status(200).json(storeInfo);
     }
+    res.status(200).json(
+      storeInfo.sort((a, b) => {
+        if (a.distance && b.distance) {
+          return a.distance - b.distance;
+        }
+        return 0;
+      })
+    );
   } catch (err) {
     res.status(500).send(err);
   }
