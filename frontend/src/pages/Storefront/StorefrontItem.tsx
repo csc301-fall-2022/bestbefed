@@ -1,4 +1,3 @@
-import React from "react";
 import { useRef } from "react";
 import { Button } from "react-bootstrap";
 import "./style.css";
@@ -21,16 +20,14 @@ function StorefrontItem({
   let quantity = useRef<HTMLInputElement>(null);
 
   async function handleAdd() {
-    // TODO use this somewhere and check if it works
     const request_data = {
       inventoryItemId: id,
-      quantity: quantity,
+      quantity: Number(quantity.current?.value).valueOf(),
     };
     await axios.post(ADD_CART_ITEM_URL, JSON.stringify(request_data), {
       headers: { "Content-Type": "application/json" },
       withCredentials: true,
     });
-    return;
   }
 
   return (
@@ -68,7 +65,11 @@ function StorefrontItem({
           min="1"
           max={max_quantity}
         ></input>
-        <Button className="add-item-to-cart mt-0 rounded-5" variant="dark">
+        <Button
+          onClick={handleAdd}
+          className="add-item-to-cart mt-0 rounded-5"
+          variant="dark"
+        >
           Add +
         </Button>
       </div>
