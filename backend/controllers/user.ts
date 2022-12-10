@@ -70,27 +70,29 @@ const cleanUser = async (newUser: UserRequest) => {
     errors["lastName"] = "Please enter your last name.";
   }
 
-  // Check that every piece of the payment info is valid (if provided)
-  if (
-    newUser.paymentInfo.creditCard ||
-    newUser.paymentInfo.cvv ||
-    newUser.paymentInfo.expiryDate
-  ) {
-    if (!validator.isCreditCard(newUser.paymentInfo.creditCard)) {
-      errors.numErrors += 1;
-      errors["paymentInfo"].push("Please enter a valid credit card number!");
-    }
-    //   if (!validator.isDate(newUser.paymentInfo.expiryDate)) {
-    //     errors["paymentInfo"].push("Please enter a valid card expiry date!");
-    //   }
+  if (newUser.paymentInfo) {
+    // Check that every piece of the payment info is valid (if provided)
     if (
-      newUser.paymentInfo.cvv.length != 3 ||
-      !validator.isNumeric(newUser.paymentInfo.cvv)
+      newUser.paymentInfo.creditCard ||
+      newUser.paymentInfo.cvv ||
+      newUser.paymentInfo.expiryDate
     ) {
-      errors.numErrors += 1;
-      errors["paymentInfo"].push(
-        "Please enter a valid CVV code for your credit card."
-      );
+      if (!validator.isCreditCard(newUser.paymentInfo.creditCard)) {
+        errors.numErrors += 1;
+        errors["paymentInfo"].push("Please enter a valid credit card number!");
+      }
+      //   if (!validator.isDate(newUser.paymentInfo.expiryDate)) {
+      //     errors["paymentInfo"].push("Please enter a valid card expiry date!");
+      //   }
+      if (
+        newUser.paymentInfo.cvv.length != 3 ||
+        !validator.isNumeric(newUser.paymentInfo.cvv)
+      ) {
+        errors.numErrors += 1;
+        errors["paymentInfo"].push(
+          "Please enter a valid CVV code for your credit card."
+        );
+      }
     }
   }
 
@@ -116,14 +118,19 @@ const constructUserRequest = async (requestBody: Request) => {
     firstName: (<any>requestBody.body).firstName.trim(),
     lastName: (<any>requestBody.body).lastName.trim(),
     email: (<any>requestBody.body).email.trim(),
-    paymentInfo: {
-      creditCard: (<any>requestBody.body).paymentInfo.creditCard.trim(),
-      expiryDate: (<any>requestBody.body).paymentInfo.expiryDate,
-      cvv: (<any>requestBody.body).paymentInfo.cvv.trim(),
-    },
+    // Payment info is optional
+    ...((<any>requestBody.body).paymentInfo && {
+      paymentInfo: {
+        creditCard:
+          (<any>requestBody.body).paymentInfo.creditCard?.trim() || "",
+        expiryDate:
+          (<any>requestBody.body).paymentInfo.expiryDate?.trim() || "",
+        cvv: (<any>requestBody.body).paymentInfo.cvv?.trim() || "",
+      },
+    }),
   };
   return userData;
-}
+};
 
 /**
  * Handles POST user/ and attempts to create new User in database.
@@ -158,14 +165,24 @@ export const createUser = async (req: Request, res: Response) => {
     newUser.password = hashedPass;
     newUser.email_verified = false;
     newUser.create_date = new Date();
-    newUser.payment_info = <any>user.paymentInfo; // this is bad practice - but we know it'll implement the interface if we get here
+    if (user.paymentInfo) {
+      newUser.payment_info = <any>user.paymentInfo; // this is bad practice - but we know it'll implement the interface if we get here
+    } else {
+      // If payment info not provided, just make it blank
+      newUser.payment_info = {
+        creditCard: "",
+        expiryDate: "",
+        cvv: "",
+      };
+    }
 
     await userRepository.save(newUser);
 
     // Send back 201 upon successful creation
     res.status(201).json("New user created.");
   } catch (err) {
-    res.status(500).send(err);
+    console.log(err);
+    res.status(500).json(err);
   }
 };
 
@@ -216,14 +233,15 @@ export const loginUser = async (req: Request, res: Response) => {
       .cookie("access_token", token, {
         httpOnly: false,
       })
-      .status(200).json({
-      token: token,
-      expiresIn: "1440",
-      authUserState: {
-        username: user.username,
-        email: user.email,
-      },
-    });
+      .status(200)
+      .json({
+        token: token,
+        expiresIn: "1440",
+        authUserState: {
+          username: user.username,
+          email: user.email,
+        },
+      });
   } catch (err) {
     res.status(500).send(err);
   }

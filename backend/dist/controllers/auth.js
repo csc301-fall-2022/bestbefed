@@ -42,7 +42,9 @@ const isAuthenticated = (req, res, next) => {
             };
         }
         else {
-            return res.status(401).json("This token doesn't correspond to a valid user.");
+            return res
+                .status(401)
+                .json("This token doesn't correspond to a valid user.");
         }
         next();
     });

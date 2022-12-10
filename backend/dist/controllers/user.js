@@ -196,7 +196,8 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             .cookie("access_token", token, {
             httpOnly: false,
         })
-            .status(200).json({
+            .status(200)
+            .json({
             token: token,
             expiresIn: "1440",
             authUserState: {
