@@ -45,7 +45,6 @@ export interface StoreErrors {
   email: string;
 }
 
-
 export interface CleanCartInfo {
   quantity: number;
   inventoryItemId: number;

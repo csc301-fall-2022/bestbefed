@@ -212,14 +212,19 @@ export const loginUser = async (req: Request, res: Response) => {
         expiresIn: "1d",
       }
     );
-    res.status(200).json({
-      token: token,
-      expiresIn: "1440",
-      authUserState: {
-        username: user.username,
-        email: user.email,
-      },
-    });
+    res
+      .cookie("access_token", token, {
+        httpOnly: false,
+      })
+      .status(200)
+      .json({
+        token: token,
+        expiresIn: "1440",
+        authUserState: {
+          username: user.username,
+          email: user.email,
+        },
+      });
   } catch (err) {
     res.status(500).send(err);
   }
