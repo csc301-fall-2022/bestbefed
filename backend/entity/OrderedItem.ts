@@ -6,7 +6,7 @@ import { Order } from "./Order";
 export class OrderedItem extends BaseEntity {
   // Using uuid instead - 16 bit randomly generated id that is hidden and can't be easily guessed
   @PrimaryGeneratedColumn()
-  item_id!: Number;
+  item_id!: number;
 
   @ManyToOne(() => InventoryItem, (inventoryItem) => inventoryItem.item_id)
   inventory_item!: InventoryItem;

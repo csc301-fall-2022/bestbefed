@@ -13,19 +13,19 @@ exports.listCartItem = exports.updateCartQuantity = exports.removeCartItem = exp
 const data_source_1 = require("../data-source");
 const CartItem_1 = require("../entity/CartItem");
 const User_1 = require("../entity/User");
-const Inventory_1 = require("../entity/Inventory");
+const InventoryItem_1 = require("../entity/InventoryItem");
 const typeorm_1 = require("typeorm");
 // Create multiple repositories that allows us to use TypeORM to interact w/ entities in DB.
 const cartRepository = data_source_1.AppDataSource.getRepository(CartItem_1.CartItem);
 const userRepository = data_source_1.AppDataSource.getRepository(User_1.User);
-const inventoryRepository = data_source_1.AppDataSource.getRepository(Inventory_1.Inventory);
+const inventoryRepository = data_source_1.AppDataSource.getRepository(InventoryItem_1.InventoryItem);
 /**
- * Handles POST store/ and attempts to create new Store in database.
+ * Handles POST user/items and attempts to add an item to the user's cart
  *
  * @param {Request}  req   Express.js object that contains all data pertaining to the POST request.
  * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
  *
- * @return {null}          Simply sends response back to client to notify of success or failure.
+ * @return {string}          Simply sends response back to client to notify if success or specifies the error
  */
 const addCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -51,6 +51,7 @@ const addCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         if (!inventoryItem) {
             return res.status(404).json("The item was not found in inventory");
         }
+        // creates the item and adds it to the database
         const newCartItem = new CartItem_1.CartItem();
         newCartItem.customer = user;
         newCartItem.quantity = cartItem.quantity;
@@ -71,12 +72,12 @@ const addCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 });
 exports.addCartItem = addCartItem;
 /**
- * Handles POST store/ and attempts to create new Store in database.
+ * Handles DELETE user/items/:cartItemId/:clearAll and attempts to remove 1 or all of the items of a user's cart
  *
  * @param {Request}  req   Express.js object that contains all data pertaining to the POST request.
  * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
  *
- * @return {null}          Simply sends response back to client to notify of success or failure.
+ * @return {String}          Simply sends response back to client to notify if cleared all or cleared 1 or error
  */
 const removeCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -116,12 +117,12 @@ const removeCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function*
 });
 exports.removeCartItem = removeCartItem;
 /**
- * Handles POST store/ and attempts to create new Store in database.
+ * Handles PATCH user/items/:cartItemId and attempts to update the quantity of a user's item
  *
  * @param {Request}  req   Express.js object that contains all data pertaining to the POST request.
  * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
  *
- * @return {null}          Simply sends response back to client to notify of success or failure.
+ * @return {String}          Simply sends response back to client to notify if success or specifies the error
  */
 const updateCartQuantity = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -160,12 +161,12 @@ const updateCartQuantity = (req, res) => __awaiter(void 0, void 0, void 0, funct
 });
 exports.updateCartQuantity = updateCartQuantity;
 /**
- * Handles POST store/login and attempts to log in and authenticate a store.
+ * Handles GET user/items and attempts to get all the items from a users cart
  *
  * @param {Request}  req   Express.js object that contains all data pertaining to the POST request.
  * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
  *
- * @return {null}          Simply sends response back to client to notify of success or failure.
+ * @return {Int}          Returns the total price of the list of items
  */
 const listCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -185,11 +186,12 @@ const listCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         const user = yield userRepository.findOneBy({
             username: "testyt3",
         });
+        // find the items by the user
         const cartItems = yield cartRepository.find({
             relations: ["customer", "cart_item", "cart_item.store"],
             where: {
                 customer: {
-                    user_id: user === null || user === void 0 ? void 0 : user.user_id, // Syntax for querying for an item based on elements of embedded entities/FK relations
+                    user_id: user === null || user === void 0 ? void 0 : user.user_id,
                 },
             },
         });
@@ -227,7 +229,7 @@ const isValidItem = (cartItemId, userId) => __awaiter(void 0, void 0, void 0, fu
     const cartItem = yield cartRepository.find({
         relations: ["customer"],
         where: {
-            item_id: (0, typeorm_1.Equal)(Number(cartItemId)), // Syntax for querying for an item based on elements of embedded entities/FK relations
+            item_id: (0, typeorm_1.Equal)(Number(cartItemId)),
         },
     });
     if (cartItem.length === 0) {
@@ -240,11 +242,11 @@ const isValidItem = (cartItemId, userId) => __awaiter(void 0, void 0, void 0, fu
     return true;
 });
 /**
- * HELPER: sanitizes all the fields in an object of type ItemInfo to prepare it for creation in Database.
+ * HELPER: sanitizes all the fields in an object of type CleanCartInfo to prepare it for creation in Database.
  *
- * @param {ItemInfo} itemData       Object containing unsanitized data needed for the creation of an InventoryItem entity.
+ * @param {ItemInfo} itemData       Object containing unsanitized data
  *
- * @return {ItemInfo}               A sanitized ItemInfo object.
+ * @return {ItemInfo}               A sanitized CleanCartInfo object.
  */
 const cleanFields = (cartItemData) => {
     if ("quantity" in cartItemData) {

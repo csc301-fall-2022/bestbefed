@@ -1,3 +1,7 @@
+import { User } from "../entity/User"; 
+import { InventoryItem } from "../entity/InventoryItem"; 
+import { Order } from "../entity/Order"; 
+
 // Collection of interfaces used by the controllers
 export interface PaymentInfo {
   creditCard: string;
@@ -45,7 +49,6 @@ export interface StoreErrors {
   email: string;
 }
 
-
 export interface CleanCartInfo {
   quantity: number;
   inventoryItemId: number;
@@ -65,4 +68,15 @@ export interface ItemInfo {
   name: string;
   price: number;
   quantity: number;
+}
+
+export interface OrderRequest {
+  order_date: Date;
+  customer: string;
+}
+
+export interface OrderItemInfo {
+  item_id: number;
+  inventory_item: InventoryItem;
+  order: Order;
 }
