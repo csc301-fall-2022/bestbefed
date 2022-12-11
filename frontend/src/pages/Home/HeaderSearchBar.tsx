@@ -16,7 +16,7 @@ function HeaderSearchBar({ setQuery }: { setQuery: (query: string) => void }) {
   if (searching) {
     return (
       <Container
-        className="d-flex p-0 justify-content-between pb-3 gap-2 align-items-center"
+        className="d-flex p-0 justify-content-between gap-2 align-items-center"
         id="search-header"
       >
         <FontAwesomeIcon icon={faSearch} />
@@ -50,7 +50,7 @@ function HeaderSearchBar({ setQuery }: { setQuery: (query: string) => void }) {
   } else {
     return (
       <Container
-        className="d-flex p-0 justify-content-between pb-3 align-items-center"
+        className="d-flex p-0 justify-content-between align-items-center"
         id="nearby-header"
       >
         <h2 className="my-0">Nearby</h2>

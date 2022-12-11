@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import validator from "validator";
 import { AppDataSource } from "../data-source";
-import { StoreErrors, StoreRequest, StoreInfo } from "./interfaces";
+import { StoreErrors, StoreRequest, StoreInfo, StoreProfileInfo } from "./interfaces";
 import { Store } from "../entity/Store";
 import bcrypt from "bcryptjs";
-import { Point } from "geojson";
+import { FeatureCollection, Point } from "geojson";
 import jwt from "jsonwebtoken";
 import distance from "@turf/distance";
 import { ILike } from "typeorm";
@@ -27,6 +27,7 @@ export const createStore = async (req: Request, res: Response) => {
       password: (<any>req.body).password.trim(),
       email: (<any>req.body).email.trim(),
       address: (<any>req.body).address.trim(),
+      type: (<any>req.body).type?.trim().toLowerCase() || "",
     };
     const store = await cleanStore(storeData);
 
@@ -36,15 +37,35 @@ export const createStore = async (req: Request, res: Response) => {
       return res.status(400).send({ errors: store });
     }
 
+    // TODO: Use environment variable for Mapbox access token
+    let location = await fetch(
+      encodeURI(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${store.address}.json?country=CA&limit=1&access_token=pk.eyJ1IjoiMWl6YXJkbyIsImEiOiJjbGEzNGRxeTMwbmo4M3BtaHhieDR5MnBrIn0.SOAbn6BE5Qqm86_K5jmECw`
+      )
+    )
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        let featureCollection = data as unknown as FeatureCollection;
+        if (featureCollection.features.length === 0) {
+          res.status(400).json("Specified address does not exist");
+          return;
+        }
+        return featureCollection.features[0].geometry as Point;
+      })
+      .catch((err) => {
+        res.status(503).json(err);
+        return;
+      });
+
+    if (!location) return;
+
     // All store data was valid - store will now be created properly.
     const salt = bcrypt.genSaltSync(10);
     const hashedPass = bcrypt.hashSync(store.password, salt);
 
     const newStore: Store = new Store();
-    const location: Point = {
-      type: "Point",
-      coordinates: [125.6, 10.1],
-    };
     newStore.store_name = store.storeName;
     newStore.email = store.email;
     newStore.address = store.address;
@@ -52,13 +73,14 @@ export const createStore = async (req: Request, res: Response) => {
     newStore.password = hashedPass;
     newStore.email_verified = false;
     newStore.location = location;
+    newStore.type = store.type;
 
     await storeRepository.save(newStore);
 
     // Send back 201 upon successful creation
     res.status(201).json("New store created.");
   } catch (err) {
-    res.status(500).send(err);
+    res.status(500).json(err);
   }
 };
 
@@ -72,36 +94,78 @@ export const createStore = async (req: Request, res: Response) => {
  */
 export const fetchStores = async (req: Request, res: Response) => {
   try {
-    const user_location: number[] = (<any>req.query).location;
+    // Get user location (if possible), and verify that it is properly formatted
+    const location = (<any>req.query).location;
+    let user_coords: [number, number];
+    if (location) {
+      try {
+        user_coords = JSON.parse(location);
+        if (!Array.isArray(user_coords)) throw TypeError;
+        if (user_coords.length !== 2) throw TypeError;
+        if (
+          typeof user_coords[0] !== "number" ||
+          typeof user_coords[1] !== "number"
+        )
+          throw TypeError;
+        if (
+          user_coords[0] < -180 ||
+          user_coords[0] > 180 ||
+          user_coords[1] < -90 ||
+          user_coords[1] > 90
+        )
+          throw TypeError;
+      } catch (err) {
+        return res.status(400).json("Location is badly formatted");
+      }
+    }
 
     // Takes the URL value tagged by "storeName"
     const requested_store_name: string = (<any>req.query).storeName;
+    let storeInfo: StoreInfo[];
     // if the user did not add "storeName" tag to URL as a filter
     if (!requested_store_name) {
       // get the stores from database
       const stores: Store[] | null = await storeRepository.find();
-      const storeInfo: StoreInfo[] = stores.map((store) => {
+      storeInfo = stores.map((store) => {
         return <StoreInfo>{
+          id: store.store_id,
           storeName: store.store_name,
           address: store.address,
-          distance: distance(user_location, store.location.coordinates),
+          location: store.location,
+          // If no user location provided, we don't set store distance
+          ...(user_coords && {
+            distance: distance(user_coords, store.location.coordinates),
+          }),
+          type: store.type || undefined,
         };
       });
-      res.status(200).json(storeInfo);
     } else {
       // if the user did add "storeName" tag to URL as a filter
       const stores: Store[] = await storeRepository.findBy({
         store_name: ILike(`%${requested_store_name}%`),
       });
-      const storeInfo: StoreInfo[] = stores.map((store) => {
+      storeInfo = stores.map((store) => {
         return <StoreInfo>{
+          id: store.store_id,
           storeName: store.store_name,
           address: store.address,
-          distance: distance(user_location, store.location.coordinates),
+          location: store.location,
+          // If no user location provided, we don't set store distance
+          ...(user_coords && {
+            distance: distance(user_coords, store.location.coordinates),
+          }),
+          type: store.type || undefined,
         };
       });
-      res.status(200).json(storeInfo);
     }
+    res.status(200).json(
+      storeInfo.sort((a, b) => {
+        if (a.distance && b.distance) {
+          return a.distance - b.distance;
+        }
+        return 0;
+      })
+    );
   } catch (err) {
     res.status(500).send(err);
   }
@@ -176,6 +240,77 @@ export const logoutStore = (req: Request, res: Response) => {
   res.status(200).send("Logged out!");
 };
 
+/**
+ * Handles GET request to /store/profile to provide data to prepopulate a store profile form on frontend.
+ *
+ * @param {Request}  req   Express.js object that contains all data pertaining to the GET request.
+ * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
+ *
+ * @return {StoreProfileInfo}          Sends back the fields of the store's profile data
+ */
+ export const getStoreProfile = async (req: Request, res: Response) => {
+  try {
+    // Fetch the respective store's data from the database
+    const storeId: string = (<any>req).store.id;
+    const store: Store | null = await storeRepository.findOneBy({
+      store_id: storeId,
+    });
+
+    const profileData: StoreProfileInfo = {
+      store_name: store?.store_name!,
+      password: store?.password!,
+      address: store?.address!,
+      email: store?.email!,
+    };
+
+    // Send store their profile data
+    res.status(200).json(profileData);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+}
+
+/**
+ * Handles PATCH request to /store/profile to update data for a store's profile
+ *
+ * @param {Request}  req   Express.js object that has a request body in the format of StoreProfileInfo (patch request)
+ * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
+ *
+ * @return {StoreProfileInfo}          Sends back an object of the store's newly updated data
+ */
+export const updateStoreProfile = async (req: Request, res: Response) => {
+  // TODO: Add validation for incoming data
+  try {
+    // Update the profile of the store that sent this request
+    const storeId: string = (<any>req).store.id;
+
+    // If the store changed their password, re-hash it before storing
+    if ((<StoreProfileInfo>req.body).password) {
+      const salt = bcrypt.genSaltSync(10);
+      const password: string = (<StoreProfileInfo>req.body).password!;
+      const hashedPass: string = bcrypt.hashSync(password, salt);
+      (<StoreProfileInfo>req.body).password = hashedPass;
+    }
+    await storeRepository.update(storeId, <StoreProfileInfo>req.body);
+
+    // TODO: Duplicate code seen in getStoreProfile - maybe refactor
+    // Send the store's newly updated data back to them
+    const store: Store | null = await storeRepository.findOneBy({
+      store_id: storeId,
+    }); 
+    const profileData: StoreProfileInfo = {
+      store_name: store?.store_name!,
+      password: store?.password!,
+      address: store?.address!,
+      email: store?.email!,
+    };
+
+    res.status(200).json(profileData);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+}
+
 // Helper functions
 const isStoreErrors = (obj: any) => {
   return "numErrors" in obj;
@@ -197,6 +332,7 @@ const cleanStore = async (newStore: StoreRequest) => {
     password: "",
     email: "",
     address: "",
+    type: "",
   };
 
   // Check if a store with this name already exists in the database

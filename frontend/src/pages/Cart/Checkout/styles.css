@@ -1,0 +1,124 @@
+@import url('https://fonts.googleapis.com/css2?family=Alexandria:wght@700&family=Covered+By+Your+Grace&family=Indie+Flower&display=swap');
+
+
+.form-container {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: safe;
+  min-height: 100vh;
+  background-color: wheat;
+}
+
+.sectionf {
+  width: 100%;
+  max-width: 420px;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 1rem;
+  margin: 10px;
+  background-color: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  border-radius: 1em;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  flex-grow: 1;
+  padding-bottom: 1rem;
+}
+
+section a,
+section a:visited {
+  color: #fff;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+button,
+textarea {
+  font-family: "Nunito", sans-serif;
+  font-size: 22px;
+  padding: 0.25rem;
+  border-radius: 0.5rem;
+  border: none;
+}
+
+label,
+button {
+  margin-top: 1rem;
+}
+
+button {
+  padding: 0.5rem;
+}
+
+.instructions {
+  font-size: 0.75rem;
+  border-radius: 0.5rem;
+  background: #000;
+  color: #fff;
+  padding: 0.25rem;
+  position: relative;
+  bottom: -10px;
+}
+
+.instructions > svg {
+  margin-right: 0.25rem;
+}
+
+.offscreen {
+  position: absolute;
+  left: -9999px;
+}
+
+.hide {
+  display: none;
+}
+
+.valid {
+  color: limegreen;
+  margin-left: 0.25rem;
+}
+
+.invalid {
+  color: red;
+  margin-left: 0.25rem;
+}
+
+.errmsg {
+  background-color: lightpink;
+  color: firebrick;
+  font-weight: bold;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.line {
+  display: inline-block;
+}
+
+.list-container{
+  width: 100%;
+  max-width: 420px;
+  min-height: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-left: 3rem;
+  padding-right: 3rem;
+  margin: 10px;
+  background-color: #FAF9F6;
+  /* background-color: rgba(0, 0, 0, 0.4); */
+  color: #fff;
+  border-radius: 0em;
+  /* border-radius: 1em;*/
+  text-align: center;
+  font-family: "Indie Flower", "Covered By Your Grace";
+  font-size: larger;
+}
