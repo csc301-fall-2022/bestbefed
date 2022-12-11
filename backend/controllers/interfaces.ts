@@ -72,13 +72,14 @@ export interface ItemInfo {
 
 export interface OrderRequest {
   order_date: Date;
-  customer: string;
+  customer: User;
 }
 
 export interface OrderItemInfo {
   item_id: number;
   inventory_item: InventoryItem;
   order: Order;
+  quantity: number;
 }
 
 export interface ProfileInfo {
@@ -92,7 +93,7 @@ export interface ProfileInfo {
 }
 
 export interface StoreProfileInfo {
-  store_neame?: string;
+  store_name?: string;
   password?: string;
   address?: string;
   email?: string;

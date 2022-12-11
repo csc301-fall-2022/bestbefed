@@ -27,6 +27,10 @@ __decorate([
     (0, typeorm_1.ManyToOne)(() => Order_1.Order, (order) => order.order_id),
     __metadata("design:type", Order_1.Order)
 ], OrderedItem.prototype, "order", void 0);
+__decorate([
+    (0, typeorm_1.Column)("int"),
+    __metadata("design:type", Number)
+], OrderedItem.prototype, "quantity", void 0);
 OrderedItem = __decorate([
     (0, typeorm_1.Entity)()
 ], OrderedItem);
