@@ -31,12 +31,14 @@ const storeRepository = data_source_1.AppDataSource.getRepository(Store_1.Store)
  * @return {null}          Simply sends response back to client to notify of success or failure.
  */
 const createStore = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
         const storeData = {
             storeName: req.body.storeName.trim(),
             password: req.body.password.trim(),
             email: req.body.email.trim(),
             address: req.body.address.trim(),
+            type: ((_a = req.body.type) === null || _a === void 0 ? void 0 : _a.trim().toLowerCase()) || "",
         };
         const store = yield cleanStore(storeData);
         // Do not proceed with store creation if there are errors with entered data.
@@ -44,14 +46,29 @@ const createStore = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             // Send back a 400 response to acknowledge register attempt but send back errors
             return res.status(400).send({ errors: store });
         }
+        // TODO: Use environment variable for Mapbox access token
+        let location = yield fetch(encodeURI(`https://api.mapbox.com/geocoding/v5/mapbox.places/${store.address}.json?country=CA&limit=1&access_token=pk.eyJ1IjoiMWl6YXJkbyIsImEiOiJjbGEzNGRxeTMwbmo4M3BtaHhieDR5MnBrIn0.SOAbn6BE5Qqm86_K5jmECw`))
+            .then((res) => {
+            return res.json();
+        })
+            .then((data) => {
+            let featureCollection = data;
+            if (featureCollection.features.length === 0) {
+                res.status(400).json("Specified address does not exist");
+                return;
+            }
+            return featureCollection.features[0].geometry;
+        })
+            .catch((err) => {
+            res.status(503).json(err);
+            return;
+        });
+        if (!location)
+            return;
         // All store data was valid - store will now be created properly.
         const salt = bcryptjs_1.default.genSaltSync(10);
         const hashedPass = bcryptjs_1.default.hashSync(store.password, salt);
         const newStore = new Store_1.Store();
-        const location = {
-            type: "Point",
-            coordinates: [125.6, 10.1],
-        };
         newStore.store_name = store.storeName;
         newStore.email = store.email;
         newStore.address = store.address;
@@ -59,12 +76,13 @@ const createStore = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         newStore.password = hashedPass;
         newStore.email_verified = false;
         newStore.location = location;
+        newStore.type = store.type;
         yield storeRepository.save(newStore);
         // Send back 201 upon successful creation
         res.status(201).json("New store created.");
     }
     catch (err) {
-        res.status(500).send(err);
+        res.status(500).json(err);
     }
 });
 exports.createStore = createStore;
@@ -78,36 +96,59 @@ exports.createStore = createStore;
  */
 const fetchStores = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user_location = req.query.location;
+        // Get user location (if possible), and verify that it is properly formatted
+        const location = req.query.location;
+        let user_coords;
+        if (location) {
+            try {
+                user_coords = JSON.parse(location);
+                if (!Array.isArray(user_coords))
+                    throw TypeError;
+                if (user_coords.length !== 2)
+                    throw TypeError;
+                if (typeof user_coords[0] !== "number" ||
+                    typeof user_coords[1] !== "number")
+                    throw TypeError;
+                if (user_coords[0] < -180 ||
+                    user_coords[0] > 180 ||
+                    user_coords[1] < -90 ||
+                    user_coords[1] > 90)
+                    throw TypeError;
+            }
+            catch (err) {
+                return res.status(400).json("Location is badly formatted");
+            }
+        }
         // Takes the URL value tagged by "storeName"
         const requested_store_name = req.query.storeName;
+        let storeInfo;
         // if the user did not add "storeName" tag to URL as a filter
         if (!requested_store_name) {
             // get the stores from database
             const stores = yield storeRepository.find();
-            const storeInfo = stores.map((store) => {
-                return {
-                    storeName: store.store_name,
-                    address: store.address,
-                    distance: (0, distance_1.default)(user_location, store.location.coordinates),
-                };
+            storeInfo = stores.map((store) => {
+                return Object.assign(Object.assign({ id: store.store_id, storeName: store.store_name, address: store.address, location: store.location }, (user_coords && {
+                    distance: (0, distance_1.default)(user_coords, store.location.coordinates),
+                })), { type: store.type || undefined });
             });
-            res.status(200).json(storeInfo);
         }
         else {
             // if the user did add "storeName" tag to URL as a filter
             const stores = yield storeRepository.findBy({
                 store_name: (0, typeorm_1.ILike)(`%${requested_store_name}%`),
             });
-            const storeInfo = stores.map((store) => {
-                return {
-                    storeName: store.store_name,
-                    address: store.address,
-                    distance: (0, distance_1.default)(user_location, store.location.coordinates),
-                };
+            storeInfo = stores.map((store) => {
+                return Object.assign(Object.assign({ id: store.store_id, storeName: store.store_name, address: store.address, location: store.location }, (user_coords && {
+                    distance: (0, distance_1.default)(user_coords, store.location.coordinates),
+                })), { type: store.type || undefined });
             });
-            res.status(200).json(storeInfo);
         }
+        res.status(200).json(storeInfo.sort((a, b) => {
+            if (a.distance && b.distance) {
+                return a.distance - b.distance;
+            }
+            return 0;
+        }));
     }
     catch (err) {
         res.status(500).send(err);
@@ -261,6 +302,7 @@ const cleanStore = (newStore) => __awaiter(void 0, void 0, void 0, function* () 
         password: "",
         email: "",
         address: "",
+        type: "",
     };
     // Check if a store with this name already exists in the database
     const existingStore = yield storeRepository.findOneBy({
