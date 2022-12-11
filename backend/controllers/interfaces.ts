@@ -1,3 +1,6 @@
+import { User } from "../entity/User"; 
+import { InventoryItem } from "../entity/InventoryItem"; 
+import { Order } from "../entity/Order"; 
 import { Point } from "geojson";
 
 // Collection of interfaces used by the controllers
@@ -69,6 +72,18 @@ export interface ItemInfo {
   itemId: number;
   name: string;
   price: number;
+  quantity: number;
+}
+
+export interface OrderRequest {
+  order_date: Date;
+  customer: User;
+}
+
+export interface OrderItemInfo {
+  item_id: number;
+  inventory_item: InventoryItem;
+  order: Order;
   quantity: number;
 }
 
