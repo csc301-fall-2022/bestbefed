@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import { AuthProvider, RequireAuth } from "react-auth-kit";
 import { Login, Logout, Register } from "./pages/AccountPages";
+import Profile from "./pages/AccountPages/Profile"
 import Cart from "./pages/Cart/Cart";
 import Home from "./pages/Home/Home";
 import Storefront from "./pages/Storefront/Storefront";
@@ -31,6 +32,7 @@ function App() {
           >
             <Route path="/" element={<Home />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/store/:id" element={<Storefront />} />
           </Route>
           <Route path="/register" element={<Register />} />
