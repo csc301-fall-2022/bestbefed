@@ -47,7 +47,6 @@ const addCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             item_id: (0, typeorm_1.Equal)(cartItem.inventoryItemId),
         });
         if (!inventoryItem) {
-            console.log("nod item");
             return res.status(404).json("The item was not found in inventory");
         }
         // creates the item and adds it to the database
