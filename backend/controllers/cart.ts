@@ -5,7 +5,6 @@ import { CartItem } from "../entity/CartItem";
 import { User } from "../entity/User";
 import { InventoryItem } from "../entity/InventoryItem";
 import { Equal } from "typeorm";
-
 // Create multiple repositories that allows us to use TypeORM to interact w/ entities in DB.
 const cartRepository = AppDataSource.getRepository(CartItem);
 const userRepository = AppDataSource.getRepository(User);
@@ -35,33 +34,55 @@ export const addCartItem = async (req: Request, res: Response) => {
       return res.status(404).json("User not found");
     }
 
-    // Clean the fields of the item's data, we only need quantity rn but may need more later
-    const cartItem: CleanCartInfo = cleanFields(req.body);
-    const inventoryItem: InventoryItem | null =
-      await inventoryRepository.findOneBy({
-        item_id: Equal(cartItem.inventoryItemId),
-      });
-    if (!inventoryItem) {
-      console.log("nod item");
-      return res.status(404).json("The item was not found in inventory");
+    // find all the items of the user
+    const userItems: CartItem[] | null = await cartRepository.findBy({
+      customer: Equal(userId),
+    });
+
+    // check if the user already has one of this item in the cart, if yes then update the quantity
+    const cartItem: CartItem | null = userItems.filter(
+      (item) => item.cart_item != req.body.inventoryItemId
+    )[0];
+    if (cartItem) {
+      const patchBody = {};
+      if ("quantity" in req.body) {
+        (<any>patchBody).quantity = cartItem.quantity + req.body.quantity;
+      }
+
+      const c = await cartRepository.update(
+        cartItem.item_id.valueOf(),
+        patchBody
+      );
+      res.status(200).json("The item was updated successfully");
+    } else {
+      // Clean the fields of the item's data, we only need quantity rn but may need more later
+      const cartItem: CleanCartInfo = cleanFields(req.body);
+
+      const inventoryItem: InventoryItem | null =
+        await inventoryRepository.findOneBy({
+          item_id: Equal(cartItem.inventoryItemId),
+        });
+      if (!inventoryItem) {
+        return res.status(404).json("The item was not found in inventory");
+      }
+
+      // creates the item and adds it to the database
+      const newCartItem: CartItem = new CartItem();
+      newCartItem.customer = user;
+      newCartItem.quantity = cartItem.quantity;
+      newCartItem.added_date = new Date();
+      newCartItem.cart_item = inventoryItem;
+      await cartRepository.save(newCartItem);
+
+      // re-calculate the total for the cart
+      // var total: number = (<any>req).total;
+      // total +=
+      //   newCartItem.cart_item.price.valueOf() *
+      //   newCartItem.cart_item.quantity.valueOf();
+
+      // Send back 201 upon successful creation
+      res.status(201).json("New item successfully created");
     }
-
-    // creates the item and adds it to the database
-    const newCartItem: CartItem = new CartItem();
-    newCartItem.customer = user;
-    newCartItem.quantity = cartItem.quantity;
-    newCartItem.added_date = new Date();
-    newCartItem.cart_item = inventoryItem;
-    await cartRepository.save(newCartItem);
-
-    // re-calculate the total for the cart
-    // var total: number = (<any>req).total;
-    // total +=
-    //   newCartItem.cart_item.price.valueOf() *
-    //   newCartItem.cart_item.quantity.valueOf();
-
-    // Send back 201 upon successful creation
-    res.status(201).json("New item successfully created");
   } catch (err) {
     res.status(500).send(err);
   }
@@ -194,7 +215,9 @@ export const listCartItem = async (req: Request, res: Response) => {
 
     // Convert returned CartItem objects to format expected by frontend.
     const cartInfo: any[] | null = cartItems.map((item) => {
-      total += item.quantity.valueOf() * item.cart_item.price.valueOf();
+      total +=
+        item.quantity.valueOf() *
+        parseFloat(item.cart_item.price.valueOf().toFixed(2));
       return <CartItemInfo>{
         cart_item_id: item.item_id.valueOf(),
         name: item.cart_item.item_name,
@@ -204,7 +227,7 @@ export const listCartItem = async (req: Request, res: Response) => {
         inventory_item: item.cart_item.item_id.valueOf(),
       };
     });
-    cartInfo.push(total);
+    cartInfo.push(parseFloat(total.toFixed(2)));
     res.status(200).json(cartInfo);
   } catch (err) {
     res.status(500).send(err);
