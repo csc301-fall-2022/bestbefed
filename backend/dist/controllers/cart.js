@@ -41,28 +41,44 @@ const addCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         if (!user) {
             return res.status(404).json("User not found");
         }
-        // Clean the fields of the item's data, we only need quantity rn but may need more later
-        const cartItem = cleanFields(req.body);
-        const inventoryItem = yield inventoryRepository.findOneBy({
-            item_id: (0, typeorm_1.Equal)(cartItem.inventoryItemId),
+        // find all the items of the user
+        const userItems = yield cartRepository.findBy({
+            customer: (0, typeorm_1.Equal)(userId),
         });
-        if (!inventoryItem) {
-            return res.status(404).json("The item was not found in inventory");
+        // check if the user already has one of this item in the cart, if yes then update the quantity
+        const cartItem = userItems.filter((item) => item.cart_item != req.body.inventoryItemId)[0];
+        if (cartItem) {
+            const patchBody = {};
+            if ("quantity" in req.body) {
+                patchBody.quantity = cartItem.quantity + req.body.quantity;
+            }
+            const c = yield cartRepository.update(cartItem.item_id.valueOf(), patchBody);
+            res.status(200).json("The item was updated successfully");
         }
-        // creates the item and adds it to the database
-        const newCartItem = new CartItem_1.CartItem();
-        newCartItem.customer = user;
-        newCartItem.quantity = cartItem.quantity;
-        newCartItem.added_date = new Date();
-        newCartItem.cart_item = inventoryItem;
-        yield cartRepository.save(newCartItem);
-        // re-calculate the total for the cart
-        // var total: number = (<any>req).total;
-        // total +=
-        //   newCartItem.cart_item.price.valueOf() *
-        //   newCartItem.cart_item.quantity.valueOf();
-        // Send back 201 upon successful creation
-        res.status(201).json("New item successfully created");
+        else {
+            // Clean the fields of the item's data, we only need quantity rn but may need more later
+            const cartItem = cleanFields(req.body);
+            const inventoryItem = yield inventoryRepository.findOneBy({
+                item_id: (0, typeorm_1.Equal)(cartItem.inventoryItemId),
+            });
+            if (!inventoryItem) {
+                return res.status(404).json("The item was not found in inventory");
+            }
+            // creates the item and adds it to the database
+            const newCartItem = new CartItem_1.CartItem();
+            newCartItem.customer = user;
+            newCartItem.quantity = cartItem.quantity;
+            newCartItem.added_date = new Date();
+            newCartItem.cart_item = inventoryItem;
+            yield cartRepository.save(newCartItem);
+            // re-calculate the total for the cart
+            // var total: number = (<any>req).total;
+            // total +=
+            //   newCartItem.cart_item.price.valueOf() *
+            //   newCartItem.cart_item.quantity.valueOf();
+            // Send back 201 upon successful creation
+            res.status(201).json("New item successfully created");
+        }
     }
     catch (err) {
         res.status(500).send(err);
@@ -186,7 +202,9 @@ const listCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         });
         // Convert returned CartItem objects to format expected by frontend.
         const cartInfo = cartItems.map((item) => {
-            total += item.quantity.valueOf() * item.cart_item.price.valueOf();
+            total +=
+                item.quantity.valueOf() *
+                    parseFloat(item.cart_item.price.valueOf().toFixed(2));
             return {
                 cart_item_id: item.item_id.valueOf(),
                 name: item.cart_item.item_name,
@@ -196,7 +214,7 @@ const listCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                 inventory_item: item.cart_item.item_id.valueOf(),
             };
         });
-        cartInfo.push(total);
+        cartInfo.push(parseFloat(total.toFixed(2)));
         res.status(200).json(cartInfo);
     }
     catch (err) {
