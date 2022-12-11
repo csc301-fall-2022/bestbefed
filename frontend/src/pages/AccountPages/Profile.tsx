@@ -9,15 +9,13 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import isEmail from "validator/lib/isEmail";
 import {Link} from 'react-router-dom'
+import validator from "validator";
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
 const FN_REGEX = /^[A-z][A-z ]{0,23}$/;
 const LN_REGEX = /^[A-z][A-z ]{0,23}$/;
-const visaRegEx = /^(?:4[0-9]{12}(?:[0-9]{3})?)$/;
-const mastercardRegEx = /^(?:5[1-5][0-9]{14})$/;
-const amexpRegEx = /^(?:3[47][0-9]{13})$/;
-const discovRegEx = /^(?:6(?:011|5[0-9][0-9])[0-9]{12})$/;
 const expREGEX = /^[0-9]{2}[/][0-9]{2}$/;
 const cvvREGEX = /^[0-9]{3}$/;
+
 
 const PROFILE_URL = "/user/profile/";
 
@@ -121,14 +119,8 @@ function Profile() {
     function ValidateCreditCardNumber(ccNum: string) {
         var isValid = false;
       
-        if (visaRegEx.test(ccNum)) {
-          isValid = true;
-        } else if (mastercardRegEx.test(ccNum)) {
-          isValid = true;
-        } else if (amexpRegEx.test(ccNum)) {
-          isValid = true;
-        } else if (discovRegEx.test(ccNum)) {
-          isValid = true;
+        if (validator.isCreditCard(ccNum)){
+          return true;
         }
       
         return isValid;
@@ -222,10 +214,10 @@ function Profile() {
         try {
             const request_data: LooseObject = {};
             if (firstname){
-                request_data.firstname = firstname;
+                request_data.firstName = firstname;
             }
             if (lastname){
-                request_data.lastname = lastname;
+                request_data.lastName = lastname;
             }
             if (email){
                 request_data.email = email;
@@ -234,7 +226,7 @@ function Profile() {
                 request_data.password = password;
             }
             if (creditcard){
-                request_data.creditcard = creditcard;
+                request_data.creditCard = creditcard;
             }
             if (cvv){
                 request_data.cvv = cvv;
@@ -243,7 +235,7 @@ function Profile() {
                 request_data.exp = exp;
             }
 
-            console.log(request_data)
+
             await axios.patch(PROFILE_URL, JSON.stringify(request_data), {
                 headers: { "Content-Type": "application/json" },
                 withCredentials: true,
