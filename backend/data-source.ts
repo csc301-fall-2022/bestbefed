@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import { Inventory } from "./entity/Inventory";
+import { InventoryItem } from "./entity/InventoryItem";
 import { Order } from "./entity/Order";
 import { User } from "./entity/User";
 import { CartItem } from "./entity/CartItem";
@@ -17,7 +17,7 @@ export const AppDataSource = new DataSource({
   username: "postgres",
   password: process.env.PRODUCTION ? process.env.POSTGRES_PW : "postgres",
   database: "postgres",
-  entities: [User, Order, Inventory, CartItem, OrderedItem, Store],
+  entities: [User, Order, InventoryItem, CartItem, OrderedItem, Store],
   synchronize: true,
   logging: false,
 });

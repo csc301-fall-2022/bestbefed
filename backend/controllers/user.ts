@@ -4,9 +4,9 @@ import jwt from "jsonwebtoken";
 import validator from "validator";
 
 import { AppDataSource } from "../data-source";
-import { PaymentInfo, UserErrors, UserRequest } from "./interfaces";
+import { PaymentInfo, UserErrors, UserRequest, ProfileInfo } from "./interfaces";
 import { Order } from "../entity/Order";
-import { Inventory } from "../entity/Inventory";
+import { InventoryItem } from "../entity/InventoryItem";
 import { User } from "../entity/User";
 // import { DataSource } from "typeorm";
 
@@ -70,27 +70,29 @@ const cleanUser = async (newUser: UserRequest) => {
     errors["lastName"] = "Please enter your last name.";
   }
 
-  // Check that every piece of the payment info is valid (if provided)
-  if (
-    newUser.paymentInfo.creditCard ||
-    newUser.paymentInfo.cvv ||
-    newUser.paymentInfo.expiryDate
-  ) {
-    if (!validator.isCreditCard(newUser.paymentInfo.creditCard)) {
-      errors.numErrors += 1;
-      errors["paymentInfo"].push("Please enter a valid credit card number!");
-    }
-    //   if (!validator.isDate(newUser.paymentInfo.expiryDate)) {
-    //     errors["paymentInfo"].push("Please enter a valid card expiry date!");
-    //   }
+  if (newUser.paymentInfo) {
+    // Check that every piece of the payment info is valid (if provided)
     if (
-      newUser.paymentInfo.cvv.length != 3 ||
-      !validator.isNumeric(newUser.paymentInfo.cvv)
+      newUser.paymentInfo.creditCard ||
+      newUser.paymentInfo.cvv ||
+      newUser.paymentInfo.expiryDate
     ) {
-      errors.numErrors += 1;
-      errors["paymentInfo"].push(
-        "Please enter a valid CVV code for your credit card."
-      );
+      if (!validator.isCreditCard(newUser.paymentInfo.creditCard)) {
+        errors.numErrors += 1;
+        errors["paymentInfo"].push("Please enter a valid credit card number!");
+      }
+      //   if (!validator.isDate(newUser.paymentInfo.expiryDate)) {
+      //     errors["paymentInfo"].push("Please enter a valid card expiry date!");
+      //   }
+      if (
+        newUser.paymentInfo.cvv.length != 3 ||
+        !validator.isNumeric(newUser.paymentInfo.cvv)
+      ) {
+        errors.numErrors += 1;
+        errors["paymentInfo"].push(
+          "Please enter a valid CVV code for your credit card."
+        );
+      }
     }
   }
 
@@ -116,14 +118,19 @@ const constructUserRequest = async (requestBody: Request) => {
     firstName: (<any>requestBody.body).firstName.trim(),
     lastName: (<any>requestBody.body).lastName.trim(),
     email: (<any>requestBody.body).email.trim(),
-    paymentInfo: {
-      creditCard: (<any>requestBody.body).paymentInfo.creditCard.trim(),
-      expiryDate: (<any>requestBody.body).paymentInfo.expiryDate,
-      cvv: (<any>requestBody.body).paymentInfo.cvv.trim(),
-    },
+    // Payment info is optional
+    ...((<any>requestBody.body).paymentInfo && {
+      paymentInfo: {
+        creditCard:
+          (<any>requestBody.body).paymentInfo.creditCard?.trim() || "",
+        expiryDate:
+          (<any>requestBody.body).paymentInfo.expiryDate?.trim() || "",
+        cvv: (<any>requestBody.body).paymentInfo.cvv?.trim() || "",
+      },
+    }),
   };
   return userData;
-}
+};
 
 /**
  * Handles POST user/ and attempts to create new User in database.
@@ -158,14 +165,24 @@ export const createUser = async (req: Request, res: Response) => {
     newUser.password = hashedPass;
     newUser.email_verified = false;
     newUser.create_date = new Date();
-    newUser.payment_info = <any>user.paymentInfo; // this is bad practice - but we know it'll implement the interface if we get here
+    if (user.paymentInfo) {
+      newUser.payment_info = <any>user.paymentInfo; // this is bad practice - but we know it'll implement the interface if we get here
+    } else {
+      // If payment info not provided, just make it blank
+      newUser.payment_info = {
+        creditCard: "",
+        expiryDate: "",
+        cvv: "",
+      };
+    }
 
     await userRepository.save(newUser);
 
     // Send back 201 upon successful creation
     res.status(201).json("New user created.");
   } catch (err) {
-    res.status(500).send(err);
+    console.log(err);
+    res.status(500).json(err);
   }
 };
 
@@ -198,6 +215,7 @@ export const loginUser = async (req: Request, res: Response) => {
 
     // Create the JWT to provide user with authentication.
     const payload = {
+      type: "user",
       id: user.user_id,
     };
     const token = jwt.sign(
@@ -211,14 +229,19 @@ export const loginUser = async (req: Request, res: Response) => {
         expiresIn: "1d",
       }
     );
-    res.status(200).json({
-      token: token,
-      expiresIn: "1440",
-      authUserState: {
-        username: user.username,
-        email: user.email,
-      },
-    });
+    res
+      .cookie("access_token", token, {
+        httpOnly: false,
+      })
+      .status(200)
+      .json({
+        token: token,
+        expiresIn: "1440",
+        authUserState: {
+          username: user.username,
+          email: user.email,
+        },
+      });
   } catch (err) {
     res.status(500).send(err);
   }
@@ -236,3 +259,103 @@ export const logoutUser = (req: Request, res: Response) => {
   res.clearCookie("access_token");
   res.status(200).send("Logged out!");
 };
+
+/**
+ * Handles GET request to /user/profile to provide data to prepopulate a profile form on frontend.
+ *
+ * @param {Request}  req   Express.js object that contains all data pertaining to the GET request.
+ * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
+ *
+ * @return {ProfileInfo}          Sends back 
+ */
+export const getUserProfile = async (req: Request, res: Response) => {
+    try {
+      // Fetch the respective user's data from the database
+      const userId: string = (<any>req).user.id;
+      const user: User | null = await userRepository.findOneBy({
+        user_id: userId,
+      });
+
+      const profileData: ProfileInfo = {
+        firstName: user?.firstName,
+        lastName: user?.lastName,
+        email: user?.email,
+        password: user?.password,
+        creditCard: user?.payment_info.creditCard,
+        cvv: user?.payment_info.cvv,
+        exp: user?.payment_info.expiryDate,
+      };
+
+      // Send user their profile data
+      res.status(200).json(profileData);
+    } catch (err) {
+      res.status(500).send(err);
+    }
+}
+
+/**
+ * Handles PATCH request to /user/profile to update data for a user's profile
+ *
+ * @param {Request}  req   Express.js object that has a request body in the format of ProfileInfo (patch request)
+ * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
+ *
+ * @return {ProfileInfo}          Sends back an object of the user's newly updated data
+ */
+export const updateUserProfile = async (req: Request, res: Response) => {
+  // TODO: Add validation for incoming data
+  try {
+    // Update the profile of the user that sent this request
+    const userId: string = (<any>req).user.id;
+
+    // If the user changed their password, re-hash it before storing
+    if ((<ProfileInfo>req.body).password) {
+      const salt = bcrypt.genSaltSync(10);
+      const password: string = (<ProfileInfo>req.body).password!;
+      const hashedPass: string = bcrypt.hashSync(password, salt);
+      (<ProfileInfo>req.body).password = hashedPass;
+    }
+
+    // Updating payment info (special case b/c interface doesn't match up with User Entity)
+    // Start off by getting the user's current payment info
+    const user_before: User | null = await userRepository.findOneBy({
+      user_id: userId,
+    }); 
+    const cardObj: PaymentInfo = user_before?.payment_info!;
+
+    // Check for what's been updated
+    if ((<ProfileInfo>req.body).creditCard) {
+      cardObj.creditCard = (<ProfileInfo>req.body).creditCard!;
+      delete (<ProfileInfo>req.body).creditCard;
+    }
+    if ((<ProfileInfo>req.body).exp) {
+      cardObj.expiryDate = (<ProfileInfo>req.body).exp!;
+      delete (<ProfileInfo>req.body).exp;
+    }
+    if ((<ProfileInfo>req.body).cvv) {
+      cardObj.cvv = (<ProfileInfo>req.body).cvv!;
+      delete (<ProfileInfo>req.body).cvv;
+    }
+    req.body['payment_info'] = cardObj;
+
+    await userRepository.update(userId, req.body);
+
+    // TODO: Duplicate code seen in getUserProfile - maybe refactor
+    // Send the user's newly updated data back to them
+    const user: User | null = await userRepository.findOneBy({
+      user_id: userId,
+    }); 
+    const profileData: ProfileInfo = {
+      firstName: user?.firstName,
+      lastName: user?.lastName,
+      email: user?.email,
+      password: user?.password,
+      creditCard: user?.payment_info.creditCard,
+      cvv: user?.payment_info.cvv,
+      exp: user?.payment_info.expiryDate,
+    };
+
+    res.status(200).json(profileData);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+}

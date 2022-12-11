@@ -5,7 +5,7 @@ import {
   BaseEntity,
   ManyToOne,
 } from "typeorm";
-import { Inventory } from "./Inventory";
+import { InventoryItem } from "./InventoryItem";
 import { User } from "./User";
 
 @Entity()
@@ -20,8 +20,8 @@ export class CartItem extends BaseEntity {
   @Column("date")
   added_date!: Date;
 
-  @ManyToOne(() => Inventory, (inventory) => inventory.item_id)
-  cart_item!: Inventory;
+  @ManyToOne(() => InventoryItem, (inventoryItem) => inventoryItem.item_id)
+  cart_item!: InventoryItem;
 
   @ManyToOne(() => User, (user) => user.user_id)
   customer!: User;

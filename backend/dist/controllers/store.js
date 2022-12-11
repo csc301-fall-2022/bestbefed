@@ -12,13 +12,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logoutStore = exports.loginStore = exports.fetchStores = exports.createStore = void 0;
+exports.updateStoreProfile = exports.getStoreProfile = exports.logoutStore = exports.loginStore = exports.fetchStores = exports.createStore = void 0;
 const validator_1 = __importDefault(require("validator"));
 const data_source_1 = require("../data-source");
 const Store_1 = require("../entity/Store");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const distance_1 = __importDefault(require("@turf/distance"));
+const typeorm_1 = require("typeorm");
 // Create a store repository that allows us to use TypeORM to interact w/ Store entity in DB.
 const storeRepository = data_source_1.AppDataSource.getRepository(Store_1.Store);
 /**
@@ -77,17 +78,36 @@ exports.createStore = createStore;
  */
 const fetchStores = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user_location = req.body.location;
-        // get the stores from database
-        const stores = yield storeRepository.find();
-        const storeInfo = stores.map((store) => {
-            return {
-                storeName: store.store_name,
-                address: store.address,
-                distance: (0, distance_1.default)(user_location, store.location.coordinates),
-            };
-        });
-        res.status(200).json(storeInfo);
+        const user_location = req.query.location;
+        // Takes the URL value tagged by "storeName"
+        const requested_store_name = req.query.storeName;
+        // if the user did not add "storeName" tag to URL as a filter
+        if (!requested_store_name) {
+            // get the stores from database
+            const stores = yield storeRepository.find();
+            const storeInfo = stores.map((store) => {
+                return {
+                    storeName: store.store_name,
+                    address: store.address,
+                    distance: (0, distance_1.default)(user_location, store.location.coordinates),
+                };
+            });
+            res.status(200).json(storeInfo);
+        }
+        else {
+            // if the user did add "storeName" tag to URL as a filter
+            const stores = yield storeRepository.findBy({
+                store_name: (0, typeorm_1.ILike)(`%${requested_store_name}%`),
+            });
+            const storeInfo = stores.map((store) => {
+                return {
+                    storeName: store.store_name,
+                    address: store.address,
+                    distance: (0, distance_1.default)(user_location, store.location.coordinates),
+                };
+            });
+            res.status(200).json(storeInfo);
+        }
     }
     catch (err) {
         res.status(500).send(err);
@@ -118,6 +138,7 @@ const loginStore = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         }
         // Create the JWT to provide store with authentication.
         const payload = {
+            type: "store",
             id: store.store_id,
         };
         const token = jsonwebtoken_1.default.sign(payload, ((process.env.PRODUCTION == "true"
@@ -152,6 +173,74 @@ const logoutStore = (req, res) => {
     res.status(200).send("Logged out!");
 };
 exports.logoutStore = logoutStore;
+/**
+ * Handles GET request to /store/profile to provide data to prepopulate a store profile form on frontend.
+ *
+ * @param {Request}  req   Express.js object that contains all data pertaining to the GET request.
+ * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
+ *
+ * @return {StoreProfileInfo}          Sends back the fields of the store's profile data
+ */
+const getStoreProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Fetch the respective store's data from the database
+        const storeId = req.store.id;
+        const store = yield storeRepository.findOneBy({
+            store_id: storeId,
+        });
+        const profileData = {
+            store_name: store === null || store === void 0 ? void 0 : store.store_name,
+            password: store === null || store === void 0 ? void 0 : store.password,
+            address: store === null || store === void 0 ? void 0 : store.address,
+            email: store === null || store === void 0 ? void 0 : store.email,
+        };
+        // Send store their profile data
+        res.status(200).json(profileData);
+    }
+    catch (err) {
+        res.status(500).send(err);
+    }
+});
+exports.getStoreProfile = getStoreProfile;
+/**
+ * Handles PATCH request to /store/profile to update data for a store's profile
+ *
+ * @param {Request}  req   Express.js object that has a request body in the format of StoreProfileInfo (patch request)
+ * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
+ *
+ * @return {StoreProfileInfo}          Sends back an object of the store's newly updated data
+ */
+const updateStoreProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // TODO: Add validation for incoming data
+    try {
+        // Update the profile of the store that sent this request
+        const storeId = req.store.id;
+        // If the store changed their password, re-hash it before storing
+        if (req.body.password) {
+            const salt = bcryptjs_1.default.genSaltSync(10);
+            const password = req.body.password;
+            const hashedPass = bcryptjs_1.default.hashSync(password, salt);
+            req.body.password = hashedPass;
+        }
+        yield storeRepository.update(storeId, req.body);
+        // TODO: Duplicate code seen in getStoreProfile - maybe refactor
+        // Send the store's newly updated data back to them
+        const store = yield storeRepository.findOneBy({
+            store_id: storeId,
+        });
+        const profileData = {
+            store_name: store === null || store === void 0 ? void 0 : store.store_name,
+            password: store === null || store === void 0 ? void 0 : store.password,
+            address: store === null || store === void 0 ? void 0 : store.address,
+            email: store === null || store === void 0 ? void 0 : store.email,
+        };
+        res.status(200).json(profileData);
+    }
+    catch (err) {
+        res.status(500).send(err);
+    }
+});
+exports.updateStoreProfile = updateStoreProfile;
 // Helper functions
 const isStoreErrors = (obj) => {
     return "numErrors" in obj;

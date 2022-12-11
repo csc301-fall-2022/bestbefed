@@ -1,50 +1,38 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useContext } from "react";
 import StoreListItem from "./StoreListItem";
 import { Container } from "react-bootstrap";
-import axios from "../../api/axios";
-
-const POST_STORE_URL = "/store/stores";
+import { IMapContext, MapContext } from "./MapContextProvider";
 export interface Store {
+  id: string;
   name: string;
-  category: string;
-  distance: number;
+  category: string | null;
+  distance: number | null;
   description: string;
 }
 
-function StoreList() {
-  const [stores, setStores] = useState([]);
-  const getStores = async () => {
-    const user_loc = {
-      location: [12, 13],
-    };
-    const { data } = await axios.post(
-      POST_STORE_URL,
-      JSON.stringify(user_loc),
-      {
-        headers: { "Content-Type": "application/json" },
-        withCredentials: true,
-      }
-    );
-    setStores(data);
-  };
+function StoreList({ query }: { query: string }) {
+  const { stores, getStores } = useContext(
+    MapContext as React.Context<IMapContext>
+  );
 
   useEffect(() => {
     getStores();
-  }, []);
+  }, [query]);
 
   return (
-    <Container className="flex-grow-1 store-list px-0">
-      {stores.map(({ address, storeName, distance, description }) => {
-        return (
-          <StoreListItem
-            name={storeName}
-            category="Grocery"
-            distance={distance}
-            description={address}
-          />
-        );
-      })}
-    </Container>
+    <>
+      {stores.features.length === 0 ? (
+        <Container className="d-flex flex-grow-1 store-list px-0 align-items-center justify-content-center">
+          <div className="fs-5 fst-italic text-secondary">No stores found</div>
+        </Container>
+      ) : (
+        <Container className="flex-grow-1 store-list px-0 mt-3 pe-2">
+          {stores.features.map((store) => {
+            return <StoreListItem store={store} key={store.properties!.id} />;
+          })}
+        </Container>
+      )}
+    </>
   );
 }
 

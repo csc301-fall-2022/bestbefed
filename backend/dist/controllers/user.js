@@ -12,12 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logoutUser = exports.loginUser = exports.createUser = void 0;
+exports.updateUserProfile = exports.getUserProfile = exports.logoutUser = exports.loginUser = exports.createUser = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const validator_1 = __importDefault(require("validator"));
 const data_source_1 = require("../data-source");
 const User_1 = require("../entity/User");
+// import { DataSource } from "typeorm";
 // Create a user repository that allows us to use TypeORM to interact w/ User entities in DB.
 const userRepository = data_source_1.AppDataSource.getRepository(User_1.User);
 // Helper functions
@@ -72,21 +73,23 @@ const cleanUser = (newUser) => __awaiter(void 0, void 0, void 0, function* () {
         errors.numErrors += 1;
         errors["lastName"] = "Please enter your last name.";
     }
-    // Check that every piece of the payment info is valid (if provided)
-    if (newUser.paymentInfo.creditCard ||
-        newUser.paymentInfo.cvv ||
-        newUser.paymentInfo.expiryDate) {
-        if (!validator_1.default.isCreditCard(newUser.paymentInfo.creditCard)) {
-            errors.numErrors += 1;
-            errors["paymentInfo"].push("Please enter a valid credit card number!");
-        }
-        //   if (!validator.isDate(newUser.paymentInfo.expiryDate)) {
-        //     errors["paymentInfo"].push("Please enter a valid card expiry date!");
-        //   }
-        if (newUser.paymentInfo.cvv.length != 3 ||
-            !validator_1.default.isNumeric(newUser.paymentInfo.cvv)) {
-            errors.numErrors += 1;
-            errors["paymentInfo"].push("Please enter a valid CVV code for your credit card.");
+    if (newUser.paymentInfo) {
+        // Check that every piece of the payment info is valid (if provided)
+        if (newUser.paymentInfo.creditCard ||
+            newUser.paymentInfo.cvv ||
+            newUser.paymentInfo.expiryDate) {
+            if (!validator_1.default.isCreditCard(newUser.paymentInfo.creditCard)) {
+                errors.numErrors += 1;
+                errors["paymentInfo"].push("Please enter a valid credit card number!");
+            }
+            //   if (!validator.isDate(newUser.paymentInfo.expiryDate)) {
+            //     errors["paymentInfo"].push("Please enter a valid card expiry date!");
+            //   }
+            if (newUser.paymentInfo.cvv.length != 3 ||
+                !validator_1.default.isNumeric(newUser.paymentInfo.cvv)) {
+                errors.numErrors += 1;
+                errors["paymentInfo"].push("Please enter a valid CVV code for your credit card.");
+            }
         }
     }
     // Needs to return either the cleaned user or errors dictionary
@@ -98,28 +101,36 @@ const cleanUser = (newUser) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 /**
+ * Takes in the request data of a "create user" request.
+ *
+ * @param {Request}  requestBody   Object containing request data from sign-in form.
+ *
+ * @return { UserRequest }
+ */
+const constructUserRequest = (requestBody) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b, _c;
+    const userData = Object.assign({ username: requestBody.body.username.trim(), password: requestBody.body.password.trim(), firstName: requestBody.body.firstName.trim(), lastName: requestBody.body.lastName.trim(), email: requestBody.body.email.trim() }, (requestBody.body.paymentInfo && {
+        paymentInfo: {
+            creditCard: ((_a = requestBody.body.paymentInfo.creditCard) === null || _a === void 0 ? void 0 : _a.trim()) || "",
+            expiryDate: ((_b = requestBody.body.paymentInfo.expiryDate) === null || _b === void 0 ? void 0 : _b.trim()) || "",
+            cvv: ((_c = requestBody.body.paymentInfo.cvv) === null || _c === void 0 ? void 0 : _c.trim()) || "",
+        },
+    }));
+    return userData;
+});
+/**
  * Handles POST user/ and attempts to create new User in database.
  *
  * @param {Request}  req   Express.js object that contains all data pertaining to the POST request.
  * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
+ * @param {DataSource} repo   typeorm db.
  *
  * @return {null}          Simply sends response back to client to notify of success or failure.
  */
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Try validating the data entered for the new user.
-        const userData = {
-            username: req.body.username.trim(),
-            password: req.body.password.trim(),
-            firstName: req.body.firstName.trim(),
-            lastName: req.body.lastName.trim(),
-            email: req.body.email.trim(),
-            paymentInfo: {
-                creditCard: req.body.paymentInfo.creditCard.trim(),
-                expiryDate: req.body.paymentInfo.expiryDate,
-                cvv: req.body.paymentInfo.cvv.trim(),
-            },
-        };
+        const userData = yield constructUserRequest(req);
         const user = yield cleanUser(userData);
         // Do not proceed with user creation if there are errors with entered data.
         if (isUserErrors(user)) {
@@ -137,13 +148,24 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         newUser.password = hashedPass;
         newUser.email_verified = false;
         newUser.create_date = new Date();
-        newUser.payment_info = user.paymentInfo; // this is bad practice - but we know it'll implement the interface if we get here
+        if (user.paymentInfo) {
+            newUser.payment_info = user.paymentInfo; // this is bad practice - but we know it'll implement the interface if we get here
+        }
+        else {
+            // If payment info not provided, just make it blank
+            newUser.payment_info = {
+                creditCard: "",
+                expiryDate: "",
+                cvv: "",
+            };
+        }
         yield userRepository.save(newUser);
         // Send back 201 upon successful creation
         res.status(201).json("New user created.");
     }
     catch (err) {
-        res.status(500).send(err);
+        console.log(err);
+        res.status(500).json(err);
     }
 });
 exports.createUser = createUser;
@@ -171,6 +193,7 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
         // Create the JWT to provide user with authentication.
         const payload = {
+            type: "user",
             id: user.user_id,
         };
         const token = jsonwebtoken_1.default.sign(payload, ((process.env.PRODUCTION == "true"
@@ -178,7 +201,12 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             : "hellomyfriend")), {
             expiresIn: "1d",
         });
-        res.status(200).json({
+        res
+            .cookie("access_token", token, {
+            httpOnly: false,
+        })
+            .status(200)
+            .json({
             token: token,
             expiresIn: "1440",
             authUserState: {
@@ -205,3 +233,97 @@ const logoutUser = (req, res) => {
     res.status(200).send("Logged out!");
 };
 exports.logoutUser = logoutUser;
+/**
+ * Handles GET request to /user/profile to provide data to prepopulate a profile form on frontend.
+ *
+ * @param {Request}  req   Express.js object that contains all data pertaining to the GET request.
+ * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
+ *
+ * @return {ProfileInfo}          Sends back
+ */
+const getUserProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Fetch the respective user's data from the database
+        const userId = req.user.id;
+        const user = yield userRepository.findOneBy({
+            user_id: userId,
+        });
+        const profileData = {
+            firstName: user === null || user === void 0 ? void 0 : user.firstName,
+            lastName: user === null || user === void 0 ? void 0 : user.lastName,
+            email: user === null || user === void 0 ? void 0 : user.email,
+            password: user === null || user === void 0 ? void 0 : user.password,
+            creditCard: user === null || user === void 0 ? void 0 : user.payment_info.creditCard,
+            cvv: user === null || user === void 0 ? void 0 : user.payment_info.cvv,
+            exp: user === null || user === void 0 ? void 0 : user.payment_info.expiryDate,
+        };
+        // Send user their profile data
+        res.status(200).json(profileData);
+    }
+    catch (err) {
+        res.status(500).send(err);
+    }
+});
+exports.getUserProfile = getUserProfile;
+/**
+ * Handles PATCH request to /user/profile to update data for a user's profile
+ *
+ * @param {Request}  req   Express.js object that has a request body in the format of ProfileInfo (patch request)
+ * @param {Response} res   Express.js object that contains all data and functions needed to send response to client.
+ *
+ * @return {ProfileInfo}          Sends back an object of the user's newly updated data
+ */
+const updateUserProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // TODO: Add validation for incoming data
+    try {
+        // Update the profile of the user that sent this request
+        const userId = req.user.id;
+        // If the user changed their password, re-hash it before storing
+        if (req.body.password) {
+            const salt = bcryptjs_1.default.genSaltSync(10);
+            const password = req.body.password;
+            const hashedPass = bcryptjs_1.default.hashSync(password, salt);
+            req.body.password = hashedPass;
+        }
+        // Updating payment info (special case b/c interface doesn't match up with User Entity)
+        // Start off by getting the user's current payment info
+        const user_before = yield userRepository.findOneBy({
+            user_id: userId,
+        });
+        const cardObj = user_before === null || user_before === void 0 ? void 0 : user_before.payment_info;
+        // Check for what's been updated
+        if (req.body.creditCard) {
+            cardObj.creditCard = req.body.creditCard;
+            delete req.body.creditCard;
+        }
+        if (req.body.exp) {
+            cardObj.expiryDate = req.body.exp;
+            delete req.body.exp;
+        }
+        if (req.body.cvv) {
+            cardObj.cvv = req.body.cvv;
+            delete req.body.cvv;
+        }
+        req.body['payment_info'] = cardObj;
+        yield userRepository.update(userId, req.body);
+        // TODO: Duplicate code seen in getUserProfile - maybe refactor
+        // Send the user's newly updated data back to them
+        const user = yield userRepository.findOneBy({
+            user_id: userId,
+        });
+        const profileData = {
+            firstName: user === null || user === void 0 ? void 0 : user.firstName,
+            lastName: user === null || user === void 0 ? void 0 : user.lastName,
+            email: user === null || user === void 0 ? void 0 : user.email,
+            password: user === null || user === void 0 ? void 0 : user.password,
+            creditCard: user === null || user === void 0 ? void 0 : user.payment_info.creditCard,
+            cvv: user === null || user === void 0 ? void 0 : user.payment_info.cvv,
+            exp: user === null || user === void 0 ? void 0 : user.payment_info.expiryDate,
+        };
+        res.status(200).json(profileData);
+    }
+    catch (err) {
+        res.status(500).send(err);
+    }
+});
+exports.updateUserProfile = updateUserProfile;

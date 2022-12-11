@@ -8,7 +8,7 @@ import {
 import { Store } from "./Store";
 
 @Entity()
-export class Inventory extends BaseEntity {
+export class InventoryItem extends BaseEntity {
   // Using uuid instead - 16 bit randomly generated id that is hidden and can't be easily guessed
   @PrimaryGeneratedColumn()
   item_id!: Number;

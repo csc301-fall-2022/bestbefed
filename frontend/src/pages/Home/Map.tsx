@@ -1,30 +1,37 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useContext } from "react";
 import { Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLocationCrosshairs } from "@fortawesome/free-solid-svg-icons";
 import "mapbox-gl/dist/mapbox-gl.css";
-import mapboxgl from "mapbox-gl";
+import mapboxgl, { GeoJSONSource, Marker } from "mapbox-gl";
+import { IMapContext, MapContext } from "./MapContextProvider";
 mapboxgl.accessToken =
   "pk.eyJ1IjoiMWl6YXJkbyIsImEiOiJjbGEzNGRxeTMwbmo4M3BtaHhieDR5MnBrIn0.SOAbn6BE5Qqm86_K5jmECw";
 
 function Map() {
+  const { mapLocation, setMapLocation, curFeature, stores, getStores } =
+    useContext(MapContext as React.Context<IMapContext>);
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const [mapLocation, setMapLocation] = useState<mapboxgl.LngLat>(
-    new mapboxgl.LngLat(-79.38198, 43.64847)
+  const [curLocation, setCurLocation] = useState<mapboxgl.LngLat | null>();
+  const [droppin] = useState(
+    new Marker({
+      color: "limegreen",
+      scale: 0.85,
+    })
   );
-  let curLocation: mapboxgl.LngLat | null = null;
 
   const fetchLocation = async () => {
     if (navigator.geolocation) {
       let result = await navigator.permissions.query({ name: "geolocation" });
       if (result.state !== "denied") {
         navigator.geolocation.getCurrentPosition((position) => {
-          curLocation = new mapboxgl.LngLat(
-            position.coords.longitude,
-            position.coords.latitude
+          setCurLocation(
+            new mapboxgl.LngLat(
+              position.coords.longitude,
+              position.coords.latitude
+            )
           );
-          setMapLocation(curLocation);
         });
       }
     }
@@ -39,40 +46,72 @@ function Map() {
       center: mapLocation,
       zoom: 13,
     });
-    map.current.setPadding({
-      left: (document.querySelector("#left-panel") as HTMLElement)?.offsetWidth,
-      right: 0,
-      top: 0,
-      bottom: 0,
-    });
     map.current.on("load", () => {
-      fetch(
-        "https://api.mapbox.com/datasets/v1/1izardo/cla31ywhh0u9z20s0473wmllm/features?access_token=pk.eyJ1IjoiMWl6YXJkbyIsImEiOiJjbDhua2RkMmIwdHlxM29veWJpY2RjMDc5In0.IRH-PqrKFzsYsPjb2SAVEQ"
-      )
-        .then((response) => response.json())
-        .then((data) => {
-          map.current?.addLayer({
-            id: "stores",
-            type: "circle",
-            paint: {
-              "circle-color": "limegreen",
-              "circle-radius": 10,
-            },
-            source: {
-              type: "geojson",
-              data: data,
-            },
-          });
-        });
+      map.current?.setPadding({
+        left: (document.querySelector("#left-panel") as HTMLElement)
+          ?.offsetWidth,
+        right: 0,
+        top: 0,
+        bottom: 0,
+      });
+      let f = async () => {
+        await getStores();
+      };
+      f();
+      map.current?.addSource("stores", { type: "geojson", data: stores });
+      map.current?.addLayer({
+        id: "stores",
+        type: "circle",
+        source: "stores",
+        paint: {
+          "circle-radius": 6,
+          "circle-color": "limegreen",
+          "circle-stroke-width": 2,
+          "circle-stroke-color": "white",
+        },
+      });
+      if (map.current) droppin.addTo(map.current);
+      map.current?.on("click", (e) => {
+        setMapLocation(e.lngLat);
+      });
     });
-  });
+  }, []);
 
-  // Update map center any time lng/lat changes
+  // Update map location when we get a new current location
+  useEffect(() => {
+    if (curLocation) setMapLocation(curLocation);
+  }, [curLocation]);
+
+  // Update layer when store data changes
+  useEffect(() => {
+    let source = map.current?.getSource("stores") as GeoJSONSource;
+    if (source) {
+      source.setData(stores);
+    }
+  }, [stores]);
+
+  // Zoom to feature when we get a new feature
+  useEffect(() => {
+    if (curFeature)
+      map.current?.flyTo({
+        center: (curFeature.geometry as GeoJSON.Point).coordinates as [
+          number,
+          number
+        ],
+        zoom: 17,
+      });
+  }, [curFeature]);
+
+  // Update map center and nearby stores any time lng/lat changes
   useEffect(() => {
     if (map.current) {
-      map.current.panTo(mapLocation);
+      map.current.flyTo({ center: mapLocation, zoom: 14 });
+      droppin.remove();
+      droppin.setLngLat(mapLocation);
+      droppin.addTo(map.current);
     }
-  }, [mapLocation]);
+    getStores();
+  }, [mapLocation, droppin]);
 
   return (
     <>
