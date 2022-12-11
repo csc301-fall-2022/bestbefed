@@ -1,16 +1,15 @@
-import React, { useState } from "react";
-import mapboxgl from "mapbox-gl";
+import React from "react";
 import Map from "./Map";
 import FloatingUI from "./FloatingUI";
 import "./style.css";
+import MapContextProvider from "./MapContextProvider";
 
 function Home() {
-  const [curLocation, setCurLocation] = useState<mapboxgl.LngLat | null>(null);
   return (
-    <>
-      <FloatingUI curLocation={curLocation} />
-      <Map curLocation={curLocation} setCurLocation={setCurLocation} />
-    </>
+    <MapContextProvider>
+      <FloatingUI />
+      <Map />
+    </MapContextProvider>
   );
 }
 

@@ -79,13 +79,14 @@ const isOwnedItem = (itemId, storeId) => __awaiter(void 0, void 0, void 0, funct
  * @return {null}          Simply sends response back to client to notify of success or failure.
  */
 const listInventory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _b;
     try {
         // Attempt to get store ID from URL query params
         let storeId = req.query.storeId;
         if (!storeId) {
             // Store ID not specified in URL query params
             // Grab the store's uuid from the payload of the token held by the cookie
-            storeId = req.store;
+            storeId = (_b = req.store) === null || _b === void 0 ? void 0 : _b.id;
         }
         if (!storeId) {
             return res.status(400).json("Store not specified");

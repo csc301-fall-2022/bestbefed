@@ -314,7 +314,30 @@ export const updateUserProfile = async (req: Request, res: Response) => {
       const hashedPass: string = bcrypt.hashSync(password, salt);
       (<ProfileInfo>req.body).password = hashedPass;
     }
-    await userRepository.update(userId, <ProfileInfo>req.body);
+
+    // Updating payment info (special case b/c interface doesn't match up with User Entity)
+    // Start off by getting the user's current payment info
+    const user_before: User | null = await userRepository.findOneBy({
+      user_id: userId,
+    }); 
+    const cardObj: PaymentInfo = user_before?.payment_info!;
+
+    // Check for what's been updated
+    if ((<ProfileInfo>req.body).creditCard) {
+      cardObj.creditCard = (<ProfileInfo>req.body).creditCard!;
+      delete (<ProfileInfo>req.body).creditCard;
+    }
+    if ((<ProfileInfo>req.body).exp) {
+      cardObj.expiryDate = (<ProfileInfo>req.body).exp!;
+      delete (<ProfileInfo>req.body).exp;
+    }
+    if ((<ProfileInfo>req.body).cvv) {
+      cardObj.cvv = (<ProfileInfo>req.body).cvv!;
+      delete (<ProfileInfo>req.body).cvv;
+    }
+    req.body['payment_info'] = cardObj;
+
+    await userRepository.update(userId, req.body);
 
     // TODO: Duplicate code seen in getUserProfile - maybe refactor
     // Send the user's newly updated data back to them
