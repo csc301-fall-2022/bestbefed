@@ -42,17 +42,19 @@ const addCartItem = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             return res.status(404).json("User not found");
         }
         // find all the items of the user
-        const userItems = yield cartRepository.findBy({
-            customer: (0, typeorm_1.Equal)(userId),
+        const userItems = yield cartRepository.find({
+            relations: ["cart_item"],
+            where: { customer: (0, typeorm_1.Equal)(userId) },
         });
         // check if the user already has one of this item in the cart, if yes then update the quantity
-        const cartItem = userItems.filter((item) => item.cart_item != req.body.inventoryItemId)[0];
-        if (cartItem) {
+        const cartItem = userItems.filter((item) => item.cart_item.item_id === req.body.inventoryItemId);
+        if (cartItem.length > 0) {
+            console.log("ehre");
             const patchBody = {};
             if ("quantity" in req.body) {
-                patchBody.quantity = cartItem.quantity + req.body.quantity;
+                patchBody.quantity = cartItem[0].quantity + req.body.quantity;
             }
-            const c = yield cartRepository.update(cartItem.item_id.valueOf(), patchBody);
+            yield cartRepository.update(cartItem[0].item_id.valueOf(), patchBody);
             res.status(200).json("The item was updated successfully");
         }
         else {
