@@ -33,7 +33,7 @@ export interface StoreRequest {
 
 export interface StoreInfo {
   storeName: string;
-  distance: number;
+  distance?: number;
   address: string;
 }
 

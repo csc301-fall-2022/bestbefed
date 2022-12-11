@@ -29,7 +29,7 @@ function StoreList({
         withCredentials: true,
         params: {
           storeName: query,
-          location: curLocation ? curLocation?.toArray() : [0, 0],
+          ...(curLocation && { location: curLocation.toArray() }),
         },
       })
       .then((response) => {
