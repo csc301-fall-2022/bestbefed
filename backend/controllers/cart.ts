@@ -44,7 +44,6 @@ export const addCartItem = async (req: Request, res: Response) => {
       (item) => item.cart_item.item_id === req.body.inventoryItemId
     );
     if (cartItem.length > 0) {
-      console.log("ehre");
       const patchBody = {};
       if ("quantity" in req.body) {
         (<any>patchBody).quantity = cartItem[0].quantity + req.body.quantity;
