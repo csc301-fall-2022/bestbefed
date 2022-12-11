@@ -3,6 +3,7 @@ import Items from "./components/Items/Items";
 import Filters from "./components/Filters/Filters";
 import "./style.css";
 import axios from "../../api/axios";
+import { useNavigate } from "react-router-dom";
 
 interface CartItem {
   cart_item_id: number;
@@ -18,6 +19,7 @@ function Cart() {
   const [total, setTotal] = useState<number>(0); // "all" filter, all the items
   const [items, setItems] = useState<CartItem[]>([]); // "all" filter, all the items
   const [filteredItems, setFilteredItems] = useState<CartItem[]>([]); // filtered version of the items, initial value is what we fetched
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getCartData = async () => {
@@ -166,6 +168,7 @@ function Cart() {
           />
           <button>total: {total}</button>
           <button onClick={deleteAll}>Clear Cart</button>
+          <button onClick={() => {navigate("/checkout")}}>Checkout</button>
         </div>
       </div>
     </>
