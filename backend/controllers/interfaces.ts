@@ -77,7 +77,7 @@ export interface ProfileInfo {
 }
 
 export interface StoreProfileInfo {
-  store_neame?: string;
+  store_name?: string;
   password?: string;
   address?: string;
   email?: string;
