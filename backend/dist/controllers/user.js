@@ -285,6 +285,26 @@ const updateUserProfile = (req, res) => __awaiter(void 0, void 0, void 0, functi
             const hashedPass = bcryptjs_1.default.hashSync(password, salt);
             req.body.password = hashedPass;
         }
+        // Updating payment info (special case b/c interface doesn't match up with User Entity)
+        // Start off by getting the user's current payment info
+        const user_before = yield userRepository.findOneBy({
+            user_id: userId,
+        });
+        const cardObj = user_before === null || user_before === void 0 ? void 0 : user_before.payment_info;
+        // Check for what's been updated
+        if (req.body.creditCard) {
+            cardObj.creditCard = req.body.creditCard;
+            delete req.body.creditCard;
+        }
+        if (req.body.exp) {
+            cardObj.expiryDate = req.body.exp;
+            delete req.body.exp;
+        }
+        if (req.body.cvv) {
+            cardObj.cvv = req.body.cvv;
+            delete req.body.cvv;
+        }
+        req.body['payment_info'] = cardObj;
         yield userRepository.update(userId, req.body);
         // TODO: Duplicate code seen in getUserProfile - maybe refactor
         // Send the user's newly updated data back to them

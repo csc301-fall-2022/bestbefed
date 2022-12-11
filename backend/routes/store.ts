@@ -21,7 +21,7 @@ const router = express.Router();
 router.patch("/items/:itemId", isAuthenticated, updateInventoryItem);
 router.delete("/items/:itemId", isAuthenticated, removeInventoryItem);
 router.post("/items", isAuthenticated, addInventoryItem);
-router.get("/items", listInventory);
+router.get("/items", isAuthenticated, listInventory);
 
 // Store profile endpoints
 router.get("/profile", isAuthenticated, getStoreProfile);

@@ -68,7 +68,7 @@ p .svg-inline--fa {
 .store-list {
   mask-image: linear-gradient(
     to bottom,
-    black calc(100% - 1em),
+    black calc(100% - 3em),
     transparent 100%
   );
   overflow-y: scroll;

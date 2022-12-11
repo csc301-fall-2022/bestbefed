@@ -1,6 +1,7 @@
 import { User } from "../entity/User"; 
 import { InventoryItem } from "../entity/InventoryItem"; 
 import { Order } from "../entity/Order"; 
+import { Point } from "geojson";
 
 // Collection of interfaces used by the controllers
 export interface PaymentInfo {
@@ -33,12 +34,15 @@ export interface StoreRequest {
   password: string;
   address: string;
   email: string;
+  type: string;
 }
 
 export interface StoreInfo {
   storeName: string;
-  distance: number;
+  distance?: number;
   address: string;
+  location: Point;
+  type?: string;
 }
 
 export interface StoreErrors {
@@ -47,6 +51,7 @@ export interface StoreErrors {
   password: string;
   address: string;
   email: string;
+  type: string;
 }
 
 export interface CleanCartInfo {
