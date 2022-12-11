@@ -128,6 +128,7 @@ export const fetchStores = async (req: Request, res: Response) => {
       const stores: Store[] | null = await storeRepository.find();
       storeInfo = stores.map((store) => {
         return <StoreInfo>{
+          id: store.store_id,
           storeName: store.store_name,
           address: store.address,
           // If no user location provided, we don't set store distance
@@ -143,6 +144,7 @@ export const fetchStores = async (req: Request, res: Response) => {
       });
       storeInfo = stores.map((store) => {
         return <StoreInfo>{
+          id: store.store_id,
           storeName: store.store_name,
           address: store.address,
           // If no user location provided, we don't set store distance

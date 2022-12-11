@@ -5,6 +5,7 @@ import axios from "../../api/axios";
 
 const POST_STORE_URL = "/store/stores";
 export interface Store {
+  id: string;
   name: string;
   category: string;
   distance: number | null;
@@ -22,7 +23,6 @@ function StoreList({
   const [noneFound, setNoneFound] = useState(false);
 
   const getStores = async () => {
-    console.log(curLocation ? curLocation?.toArray() : [0, 0]);
     axios
       .get(POST_STORE_URL, {
         headers: { "Content-Type": "application/json" },
@@ -55,14 +55,15 @@ function StoreList({
   }
   return (
     <Container className="flex-grow-1 store-list px-0 pt-3">
-      {stores.map(({ address, storeName, distance, description }, i) => {
+      {stores.map(({ id, address, storeName, distance, description }, i) => {
         return (
           <StoreListItem
+            id={id}
             name={storeName}
             category="Grocery"
             distance={curLocation ? distance : null}
             description={address}
-            key={i}
+            key={id}
           />
         );
       })}
