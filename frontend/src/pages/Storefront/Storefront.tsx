@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useParams, Navigate } from "react-router-dom";
 import StorefrontItem from "./StorefrontItem";
-import placeholder from "./placeholder.jpg";
 import axios from "../../api/axios";
 
 export interface Item {
@@ -19,7 +18,6 @@ function Storefront() {
   const [items, setItems] = useState<Item[]>([]);
 
   useEffect(() => {
-    // TODO: Fetch details for store w/ given id
     axios
       .get("/store/items", {
         params: {
@@ -35,7 +33,7 @@ function Storefront() {
         console.log(err);
       });
     return;
-  }, []);
+  }, [id]);
 
   if (!fromApp) {
     // User got here from URL, not from clicking link

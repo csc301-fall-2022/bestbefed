@@ -2,16 +2,12 @@ import React, { useState } from "react";
 import { Container, Col, Row, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faBars,
-  faShoppingCart,
-  faSearch,
-} from "@fortawesome/free-solid-svg-icons";
+import { faBars, faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 import MenuSlideIn from "./MenuSlideIn";
 import StoreList from "./StoreList";
 import HeaderSearchBar from "./HeaderSearchBar";
 
-function FloatingUI({ curLocation }: { curLocation: mapboxgl.LngLat | null }) {
+function FloatingUI() {
   const [showMenu, setShowMenu] = useState(false);
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
@@ -34,7 +30,7 @@ function FloatingUI({ curLocation }: { curLocation: mapboxgl.LngLat | null }) {
         id="left-panel"
       >
         <HeaderSearchBar setQuery={setQuery} />
-        <StoreList query={query} curLocation={curLocation} />
+        <StoreList query={query} />
       </Col>
       {/* Right side of screen */}
       <Col className="d-none d-md-inline" id="map-visible-area">

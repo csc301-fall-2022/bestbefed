@@ -1,3 +1,5 @@
+import { Point } from "geojson";
+
 // Collection of interfaces used by the controllers
 export interface PaymentInfo {
   creditCard: string;
@@ -29,12 +31,15 @@ export interface StoreRequest {
   password: string;
   address: string;
   email: string;
+  type: string;
 }
 
 export interface StoreInfo {
   storeName: string;
   distance?: number;
   address: string;
+  location: Point;
+  type?: string;
 }
 
 export interface StoreErrors {
@@ -43,6 +48,7 @@ export interface StoreErrors {
   password: string;
   address: string;
   email: string;
+  type: string;
 }
 
 export interface CleanCartInfo {
