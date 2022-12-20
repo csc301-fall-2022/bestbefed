@@ -58,9 +58,9 @@ Some of the recent jarring statistics surrounding food waste and insecurity in C
 
 ### Cart Page
 
-- A cart page with dummy data
+- A cart page with data pulled from the back-end
 - Each item is associated with a store, has a price and quantity
-- Buttons to edit the quantity of each item in the cart by increasing or decreasing it, and a button to remove the item from the cart
+- Buttons to edit the quantity of each item in the cart by increasing or decreasing it, and a button to remove the item from the cart, updating the inventory in the back-end
 
 ### Available Stores Page (Main App Screen)
 
