@@ -11,7 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CartItem = void 0;
 const typeorm_1 = require("typeorm");
-const Inventory_1 = require("./Inventory");
+const InventoryItem_1 = require("./InventoryItem");
 const User_1 = require("./User");
 let CartItem = class CartItem extends typeorm_1.BaseEntity {
 };
@@ -28,8 +28,8 @@ __decorate([
     __metadata("design:type", Date)
 ], CartItem.prototype, "added_date", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => Inventory_1.Inventory, (inventory) => inventory.item_id),
-    __metadata("design:type", Inventory_1.Inventory)
+    (0, typeorm_1.ManyToOne)(() => InventoryItem_1.InventoryItem, (inventoryItem) => inventoryItem.item_id),
+    __metadata("design:type", InventoryItem_1.InventoryItem)
 ], CartItem.prototype, "cart_item", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => User_1.User, (user) => user.user_id),

@@ -2,16 +2,14 @@ import React, { useState } from "react";
 import { Container, Col, Row, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faBars,
-  faShoppingCart,
-  faSearch,
-} from "@fortawesome/free-solid-svg-icons";
+import { faBars, faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 import MenuSlideIn from "./MenuSlideIn";
 import StoreList from "./StoreList";
+import HeaderSearchBar from "./HeaderSearchBar";
 
 function FloatingUI() {
   const [showMenu, setShowMenu] = useState(false);
+  const [query, setQuery] = useState("");
   const navigate = useNavigate();
 
   const handleShowMenu = () => {
@@ -31,16 +29,8 @@ function FloatingUI() {
         className="d-flex flex-column col-12 col-md-7 col-lg-6 col-xl-5 text-start bg-white p-4 rounded-4 pe-auto shadow"
         id="left-panel"
       >
-        <Container
-          className="d-flex p-0 justify-content-between pb-3"
-          id="nearby-header"
-        >
-          <h2>Nearby</h2>
-          <Button variant="outline-dark" className="rounded-5 px-4">
-            <FontAwesomeIcon icon={faSearch} />
-          </Button>
-        </Container>
-        <StoreList />
+        <HeaderSearchBar setQuery={setQuery} />
+        <StoreList query={query} />
       </Col>
       {/* Right side of screen */}
       <Col className="d-none d-md-inline" id="map-visible-area">

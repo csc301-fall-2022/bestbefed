@@ -55,6 +55,10 @@ __decorate([
     __metadata("design:type", String)
 ], Store.prototype, "address", void 0);
 __decorate([
+    (0, typeorm_1.Column)("text", { default: "" }),
+    __metadata("design:type", String)
+], Store.prototype, "type", void 0);
+__decorate([
     (0, typeorm_1.BeforeInsert)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),

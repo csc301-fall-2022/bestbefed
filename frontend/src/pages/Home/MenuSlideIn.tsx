@@ -23,7 +23,10 @@ function MenuSlideIn({
       </Offcanvas.Header>
       <Offcanvas.Body>
         <p>
-          <FontAwesomeIcon icon={faUser} size="lg" /> Profile
+          <FontAwesomeIcon icon={faUser} size="lg" />{" "}
+          <Link to="/profile" className="text-dark">
+            Profile
+          </Link>
         </p>
         <p>
           <FontAwesomeIcon icon={faList} size="lg" /> Order History

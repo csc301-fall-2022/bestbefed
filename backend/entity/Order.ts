@@ -11,7 +11,7 @@ import { User } from "./User";
 export class Order extends BaseEntity {
   // Using uuid instead - 16 bit randomly generated id that is hidden and can't be easily guessed
   @PrimaryGeneratedColumn()
-  order_id!: Number;
+  order_id!: number;
 
   @Column("date")
   order_date!: Date;

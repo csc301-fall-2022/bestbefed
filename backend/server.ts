@@ -7,6 +7,7 @@ import "reflect-metadata";
 // Local imports
 import userRouter from "./routes/user";
 import storeRouter from "./routes/store";
+import orderRouter from "./routes/order";
 import { AppDataSource } from "./data-source";
 import { isAuthenticated } from "./controllers/auth";
 
@@ -29,6 +30,8 @@ app.get("/api", isAuthenticated, (req: Request, res: Response) => {
 app.use("/user", userRouter);
 // Store routing middleware.
 app.use("/store", storeRouter);
+// Order routing middleware.
+app.use("/order", orderRouter);
 
 // All other routes are directed to the React app
 app.use(express.static(path.join(__dirname, "../../frontend/build/")));
