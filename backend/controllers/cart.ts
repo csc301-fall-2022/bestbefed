@@ -35,21 +35,20 @@ export const addCartItem = async (req: Request, res: Response) => {
     }
 
     // find all the items of the user
-    const userItems: CartItem[] | null = await cartRepository.findBy({
-      customer: Equal(userId),
+    const userItems: CartItem[] | null = await cartRepository.find({
+      relations: ["cart_item"],
+      where: { customer: Equal(userId) },
     });
-
     // check if the user already has one of this item in the cart, if yes then update the quantity
-    const cartItem: CartItem | null = userItems.filter(
-      (item) => item.cart_item != req.body.inventoryItemId
-    )[0];
-
-    if (cartItem) {
+    const cartItem: CartItem[] | null = userItems.filter(
+      (item) => item.cart_item.item_id === req.body.inventoryItemId
+    );
+    if (cartItem.length > 0) {
       const patchBody = {};
       if ("quantity" in req.body) {
-        (<any>patchBody).quantity = cartItem.quantity + req.body.quantity;
+        (<any>patchBody).quantity = cartItem[0].quantity + req.body.quantity;
       }
-      await cartRepository.update(cartItem.item_id.valueOf(), patchBody);
+      await cartRepository.update(cartItem[0].item_id.valueOf(), patchBody);
       res.status(200).json("The item was updated successfully");
     } else {
       // Clean the fields of the item's data, we only need quantity rn but may need more later

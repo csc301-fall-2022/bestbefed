@@ -1,4 +1,5 @@
 "use strict";
+// Library imports/data
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8,18 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.cancelOrder = exports.createOrder = void 0;
-// Library imports/data
-const axios_1 = __importDefault(require("axios"));
-const a = axios_1.default.create({
-    baseURL: process.env.NODE_ENV === "production"
-        ? "https://app.bestbefed.ca"
-        : "http://localhost:8000",
-});
 const data_source_1 = require("../data-source");
 const typeorm_1 = require("typeorm");
 // Entity Imports
@@ -71,7 +62,7 @@ const createOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         }
         const orderData = {
             order_date: new Date(),
-            customer: user
+            customer: user,
         };
         // Construct the newOrder object.
         const newOrder = new Order_1.Order();
@@ -87,7 +78,9 @@ const createOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             // Check if cartItems.cart_item.quantity ("requested item in cart's store inventory quantity")
             // is greater than cartItems.quantity ("requested item in cart's quantity")
             if (cartItems[i].cart_item.quantity < cartItems[i].quantity) {
-                return res.status(400).json("The store(s) do not have the requested inventory to make this order.");
+                return res
+                    .status(400)
+                    .json("The store(s) do not have the requested inventory to make this order.");
             }
         }
         // At this point, we can proceed with the order creation.
@@ -102,12 +95,18 @@ const createOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             // Decrement the store's quantity
             // Construct the partial object:
             var tempStoreItem = new InventoryItem_1.InventoryItem();
-            tempStoreItem.quantity = (cartItems[i].cart_item.quantity - cartItems[i].quantity);
+            tempStoreItem.quantity =
+                cartItems[i].cart_item.quantity - cartItems[i].quantity;
             // Update the store inventory repo given the number id and the field to augment.
             yield storeInventoryRepository.update(cartItems[i].cart_item.item_id, tempStoreItem);
         }
         yield cartRepository.delete({ customer: { user_id: userId } });
-        return res.status(201).json("New order successfully made for " + user.username + " at " + newOrder.order_date);
+        return res
+            .status(201)
+            .json("New order successfully made for " +
+            user.username +
+            " at " +
+            newOrder.order_date);
     }
     catch (err) {
         return res.status(500).send(err);
@@ -144,10 +143,12 @@ const cancelOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         }
         const orderToCancel = yield orderRepository.findOneBy({
             order_id: (0, typeorm_1.Equal)(req.body["orderId"]),
-            customer: (0, typeorm_1.Equal)(user.user_id)
+            customer: (0, typeorm_1.Equal)(user.user_id),
         });
         if (!orderToCancel) {
-            return res.status(404).json("The order requested was not found in our database.");
+            return res
+                .status(404)
+                .json("The order requested was not found in our database.");
         }
         // At this point, we have a valid orderToCancel object of type Order
         // Query for the orderedItems[] part of the given requested orderToCancel
@@ -163,7 +164,9 @@ const cancelOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             // Increment the store's quantity
             // Construct the partial object:
             var tempStoreItem = new InventoryItem_1.InventoryItem();
-            tempStoreItem.quantity = (orderedItems[i].inventory_item.quantity + orderedItems[i].quantity);
+            tempStoreItem.quantity =
+                orderedItems[i].inventory_item.quantity +
+                    orderedItems[i].quantity;
             // Update the store inventory repo given the number id and the field to augment.
             yield storeInventoryRepository.update(orderedItems[i].inventory_item.item_id, tempStoreItem);
             // Delete the orderedItem
@@ -171,7 +174,9 @@ const cancelOrder = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         }
         // Now after wiping all ordered items, we can safely delete the entire Order object from the database:
         yield orderRepository.delete(req.body["orderId"]);
-        return res.status(201).json("Order with id: " + req.body["orderId"] + " successfully deleted.");
+        return res
+            .status(201)
+            .json("Order with id: " + req.body["orderId"] + " successfully deleted.");
     }
     catch (err) {
         return res.status(500).send(err);
